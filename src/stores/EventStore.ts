@@ -5,18 +5,25 @@ import { action, observable } from 'mobx';
 import { FRCEvent, FRCRobotEntry } from '@/types';
 
 class EventStore {
-  @observable events: FRCEvent[] = observable([]);
+  @observable events: { [key: string]: FRCEvent } = observable({});
 
   @action.bound
   loadEvent(eventSlug: string): Promise<FRCEvent> {
+    console.log(this.events[eventSlug]);
+    if (this.events[eventSlug] !== undefined) {
+      return new Promise(resolve => {
+        resolve(this.events[eventSlug]);
+      });
+    }
+  
     return fetch(`/event_data/${eventSlug}.json`)
       .then(res => res.json())
       .then(eventData => {
-        this.events.push({
+        this.events[eventSlug] = {
           slug: eventSlug,
           robotEntries: eventData.map(this.hydrateRobotEntry),
-        });
-        return eventData;
+        };
+        return this.events[eventSlug];
       });
   }
 

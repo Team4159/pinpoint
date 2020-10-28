@@ -26,6 +26,9 @@
       "@/stores/*" : [
         "stores/*"
       ],
+      "@/components/*": [
+        "components/*"
+      ],
       "@/theme" : [
         "theme/index"
       ],

@@ -1,27 +1,25 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
   Box,
-  Button,
-  Heading,
   Select,
-  Stack,
   Stat,
   StatLabel,
   StatNumber,
   StatHelpText,
-  Text
 } from '@chakra-ui/core';
+import Container from '@/components/container';
+import Header from '@/components/header';
 
 import { computed } from 'mobx';
 import { useObserver } from 'mobx-react';
 
-import EventStore, { EventContext } from '@/stores/EventStore'
+import { EventContext } from '@/stores/EventStore'
 
 const HomePage: React.FC = () => {
   const eventStore = useContext(EventContext);
   const [selectedEventSlug, setSelectedEventSlug] = useState('');
   const selectedEvent = computed(() =>
-    eventStore.events.find(event => event.slug === selectedEventSlug),
+    eventStore.events[selectedEventSlug]
   );
 
   useEffect(() => {
@@ -32,34 +30,20 @@ const HomePage: React.FC = () => {
   }, []);
 
   return useObserver(() => (
-    <Stack
-      direction='column'
-      alignItems='start'
-      minHeight='100vh'
-      backgroundColor='almostBlack'
-      color='white'
-      padding={6}
-    >
-      <Heading>
-        Hello World
-      </Heading>
-      <Button variant='outline' colorScheme='whiteAlpha'>
-        <Text fontWeight='bold' color='white'>
-          Hello World
-        </Text>
-      </Button>
+    <Container>
+      <Header />
       <Select
         width='16rem'
         borderColor='whiteAlpha.600'
         value={selectedEventSlug}
         onChange={e => setSelectedEventSlug(e.target.value)}
       >
-        {eventStore.events.length == 0 && (
+        {Object.keys(eventStore.events).length == 0 && (
           <option value=''>No Events Found</option>
         )}
-        {eventStore.events.map(event => (
-          <option key={event.slug} value={event.slug}>
-            {event.slug}
+        {Object.keys(eventStore.events).map(eventSlug => (
+          <option key={eventSlug} value={eventSlug}>
+            {eventSlug}
           </option>
         ))}
       </Select>
@@ -80,16 +64,8 @@ const HomePage: React.FC = () => {
         }</StatHelpText>
         </Stat>
       </Box>
-    </Stack>
+    </Container>
   ));
 }
 
-const HomePageWithContext: React.FC = (props) => {
-  return (
-    <EventContext.Provider value={new EventStore()}>
-      <HomePage {...props} />
-    </EventContext.Provider>
-  );
-};
-
-export default HomePageWithContext;
+export default HomePage;
