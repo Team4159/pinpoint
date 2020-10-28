@@ -5,7 +5,7 @@ import { action, observable } from 'mobx';
 import { FRCEvent, FRCRobotEntry } from '@/types';
 
 class EventStore {
-  @observable events: FRCEvent[] = [];
+  @observable events: FRCEvent[] = observable([]);
 
   @action.bound
   loadEvent(eventSlug: string): Promise<FRCEvent> {
