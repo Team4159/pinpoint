@@ -17,14 +17,21 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "experimentalDecorators": true,
     "baseUrl": "src",
     "paths": {
       "@/styles/*" : [
         "styles/*"
       ],
+      "@/stores/*" : [
+        "stores/*"
+      ],
       "@/theme" : [
         "theme/index"
       ],
+      "@/types" : [
+        "types/index"
+      ]
     }
   },
   "include": [

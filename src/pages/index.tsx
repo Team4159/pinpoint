@@ -1,3 +1,4 @@
+import { useContext, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -11,8 +12,19 @@ import {
   Text
 } from '@chakra-ui/core';
 
-const HomePage = () => {
-  return (
+import { useObserver } from 'mobx-react';
+
+import EventStore, { EventContext } from '@/stores/EventStore'
+
+const HomePage: React.FC = () => {
+  const eventStore = useContext(EventContext);
+
+  useEffect(() => {
+    eventStore.loadEvent('2018cc');
+    eventStore.loadEvent('2018roe');
+  }, []);
+
+  return useObserver(() => (
     <Stack
       direction='column'
       alignItems='start'
@@ -30,7 +42,11 @@ const HomePage = () => {
         </Text>
       </Button>
       <Select width='16rem' borderColor='whiteAlpha.600'>
-        <option>Match 1</option>
+        {eventStore.events.map(event => (
+          <option key={event.slug}>
+            {event.slug}
+          </option>
+        ))}
       </Select>
       <Box
         borderWidth='1px'
@@ -46,7 +62,15 @@ const HomePage = () => {
         </Stat>
       </Box>
     </Stack>
-  );
+  ));
 }
 
-export default HomePage;
+const HomePageWithContext: React.FC = (props) => {
+  return (
+    <EventContext.Provider value={new EventStore()}>
+      <HomePage {...props} />
+    </EventContext.Provider>
+  );
+};
+
+export default HomePageWithContext;
