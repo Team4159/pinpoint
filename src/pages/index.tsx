@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,15 +12,22 @@ import {
   Text
 } from '@chakra-ui/core';
 
+import { computed } from 'mobx';
 import { useObserver } from 'mobx-react';
 
 import EventStore, { EventContext } from '@/stores/EventStore'
 
 const HomePage: React.FC = () => {
   const eventStore = useContext(EventContext);
+  const [selectedEventSlug, setSelectedEventSlug] = useState('');
+  const selectedEvent = computed(() =>
+    eventStore.events.find(event => event.slug === selectedEventSlug),
+  );
 
   useEffect(() => {
-    eventStore.loadEvent('2018cc');
+    eventStore.loadEvent('2018cc').then(() => {
+      setSelectedEventSlug('2018cc');
+    });
     eventStore.loadEvent('2018roe');
   }, []);
 
@@ -41,9 +48,17 @@ const HomePage: React.FC = () => {
           Hello World
         </Text>
       </Button>
-      <Select width='16rem' borderColor='whiteAlpha.600'>
+      <Select
+        width='16rem'
+        borderColor='whiteAlpha.600'
+        value={selectedEventSlug}
+        onChange={e => setSelectedEventSlug(e.target.value)}
+      >
+        {eventStore.events.length == 0 && (
+          <option value=''>No Events Found</option>
+        )}
         {eventStore.events.map(event => (
-          <option key={event.slug}>
+          <option key={event.slug} value={event.slug}>
             {event.slug}
           </option>
         ))}
@@ -58,7 +73,11 @@ const HomePage: React.FC = () => {
         <Stat>
           <StatLabel>Match Number</StatLabel>
           <StatNumber>Q1</StatNumber>
-          <StatHelpText>of 67</StatHelpText>
+        <StatHelpText>of {
+          selectedEvent.get() ? (
+            Math.max(...selectedEvent.get().robotEntries.map(robotEntry => robotEntry.matchNumber))
+          ) : 'Loading...'
+        }</StatHelpText>
         </Stat>
       </Box>
     </Stack>
