@@ -27,10 +27,10 @@ enum ViewType {
   Team = 'team',
 };
 
-const FIELD_DIMS = [648, 360];
+const FIELD_DIMS = { w: 648, h: 360 };
 
-const flipCoordinates = ([y, x]: [number, number]): [number, number] =>
-  [320 - y, x + 270];
+const transformCoordinates = ([y, x]: [number, number]): [number, number] =>
+  [y * 360 / 300, x + FIELD_DIMS.w / 2];
 
 const pathToD = (coords: [number, number][]) => 
   `M${coords[0][1]},${coords[0][0]}` +
@@ -46,19 +46,26 @@ const RobotPath: React.FC<{
 
   const theme = useTheme();
 
-  const path = allianceColor == 'red' ? robotEntry.autonomousPath.map(flipCoordinates) : robotEntry.autonomousPath;
+  const path: [number, number][] = allianceColor == 'blue' ?
+    robotEntry.autonomousPath
+      .map(transformCoordinates).map(([y, x]) => [y, FIELD_DIMS.w - x]) :
+    robotEntry.autonomousPath.map(transformCoordinates)
+      .map(([y, x]) => [FIELD_DIMS.h - y, x]);
 
   return (
     <g>
       <text
         fill={theme.colors[allianceColor][600]}
-        x={path[0][1]}
-        y={path[0][0]}
+        x={Math.min(Math.max(path[0][1], 0), FIELD_DIMS.w - 40)}
+        y={path[0][0] - 5}
       >
         {robotEntry.teamNumber}
       </text>
-      <path
+      <motion.path
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1, transition: { duration: 1 } }}
         stroke={theme.colors[allianceColor][600]}
+        strokeDasharray={null}
         fill='none'
         d={pathToD(path)}
       />
@@ -103,8 +110,6 @@ const HomePage: React.FC = () => {
   const selectedEntries = computed(() => 
     selectedEvent.get() ? selectedEvent.get().robotEntries.filter(robotEntry => robotEntry[viewType.get() + 'Number'] == selectedView) : []
   );
-
-  const [isFieldFlipped] = useState(observable.box(false));
 
   const getTBAMatch = (matchNumber: number) => selectedEvent.get().tba[`${selectedEventSlug.get()}_qm${matchNumber}`];
   const getPlatformColor = (matchNumber: number, platformIndex: number, left: boolean) => 
@@ -198,16 +203,10 @@ const HomePage: React.FC = () => {
                 }
               </Text>
             </Stack>
-            <motion.svg
+            <svg
               width='648'
               height='360'
               xmlns='http://www.w3.org/2000/svg'
-              initial='normal'
-              animate={isFieldFlipped.get() ? 'flipped' : 'normal'}
-              variants={{
-                normal: { transform: 'scale(1)' },
-                flipped: { transform: 'scale(-1)' },
-              }}
             >
               { /* Field Outline */ }
               <rect stroke='white' strokeWidth='1.5' x='0' y='0' width='648' height='360'/>
@@ -242,21 +241,15 @@ const HomePage: React.FC = () => {
               <rect stroke={theme.colors.blue[600]} strokeWidth='1.5' x='0' y='120' width='36' height='48'/>
               <rect stroke={theme.colors.red[600]} strokeWidth='1.5' x='612' y='192' width='36' height='48'/>
               {
-                selectedEntries.get().map((robotEntry, idx) => (
+                selectedEntries.get().map(robotEntry => (
                   <RobotPath
-                    key={idx}
+                    key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
                     robotEntry={robotEntry}
                     allianceColor={getAllianceColor(robotEntry.matchNumber, robotEntry.teamNumber)}
                   />
                 ))
               }
-            </motion.svg>
-            <Button
-              {...styles.button}
-              onClick={() => isFieldFlipped.set(!isFieldFlipped.get())}
-            >
-              <Text color='white'>Flip Field</Text>
-            </Button>
+            </svg>
           </Stack>
         )}
       </Stack>
