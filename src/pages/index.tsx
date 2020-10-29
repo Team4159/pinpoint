@@ -129,7 +129,10 @@ const HomePage: React.FC = () => {
             <Select
               {...styles.select}
               value={selectedEventSlug.get()}
-              onChange={e => selectedEventSlug.set(e.target.value)}
+              onChange={e => {
+                selectedEventSlug.set(e.target.value);
+                selectedView.set(Math.min(...(viewType.get() == ViewType.Match ? matchNumbers.get() : teamNumbers.get())));
+              }}
             >
               {Object.keys(eventStore.events).length == 0 && (
                 <option value=''>No Events Found</option>
@@ -246,7 +249,7 @@ const HomePage: React.FC = () => {
               {
                 selectedEntries.get().map(robotEntry => (
                   <RobotPath
-                    key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
+                    key={`${selectedEventSlug.get()}${robotEntry.matchNumber}${robotEntry.teamNumber}`}
                     robotEntry={robotEntry}
                     allianceColor={getAllianceColor(robotEntry.matchNumber, robotEntry.teamNumber)}
                   />
