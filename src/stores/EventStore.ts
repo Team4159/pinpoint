@@ -2,7 +2,7 @@ import { createContext } from 'react';
 
 import { action, observable } from 'mobx';
 
-import { FRCEvent, FRCRobotEntry } from '@/types';
+import { FRCEvent, FRCRobotEntry, TBAMatch } from '@/types';
 
 class EventStore {
   @observable events: { [key: string]: FRCEvent } = observable({});
@@ -21,7 +21,16 @@ class EventStore {
         this.events[eventSlug] = {
           slug: eventSlug,
           robotEntries: eventData.map(this.hydrateRobotEntry),
+          tba: {}
         };
+      })
+      .then(() => fetch(`/event_data/${eventSlug}_tba.json`))
+      .then(res => res.json())
+      .then((tbaData: TBAMatch[]) => {
+        this.events[eventSlug].tba = Object.fromEntries(tbaData.map(tbaMatch => [
+          tbaMatch.key,
+          tbaMatch
+        ]));
         return this.events[eventSlug];
       });
   }

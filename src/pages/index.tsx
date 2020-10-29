@@ -5,6 +5,7 @@ import {
   Select,
   Stack,
   Text,
+  useTheme,
 } from '@chakra-ui/core';
 import { motion } from 'framer-motion';
 import Container from '@/components/container';
@@ -24,6 +25,8 @@ enum ViewType {
 };
 
 const HomePage: React.FC = () => {
+  const theme = useTheme();
+
   const eventStore = useContext(EventContext);
 
   const [selectedEventSlug] = useState(observable.box(''));
@@ -47,6 +50,9 @@ const HomePage: React.FC = () => {
     viewType.get() == ViewType.Match ? matchNumbers.get() : teamNumbers.get()
   );
   const [selectedView] = useState(observable.box(1));
+  const selectedEntries = computed(() => 
+    selectedEvent.get() ? selectedEvent.get().robotEntries.filter(robotEntry => robotEntry[viewType.get() + 'Number'] == selectedView) : []
+  );
 
   useEffect(() => {
     eventStore.loadEvent('2018cc').then(() => {
@@ -54,6 +60,10 @@ const HomePage: React.FC = () => {
     });
     eventStore.loadEvent('2018roe');
   }, []);
+
+  const getTBAMatch = (matchNumber: number) => selectedEvent.get().tba[`${selectedEventSlug.get()}_qm${matchNumber}`];
+  const getPlatformColor = (matchNumber: number, platformIndex: number, left: boolean) => 
+    theme.colors[getTBAMatch(matchNumber).score_breakdown.blue.tba_gameData[platformIndex] === (left ? 'L' : 'R') ? 'blue' : 'red'][600];
 
   return useObserver(() => (
     <Container>
@@ -112,10 +122,31 @@ const HomePage: React.FC = () => {
             </Select>
           </Box>
         </Stack>
-        <Stack flexGrow={1} spacing={6}>
-          <Heading>
-            {viewType.get()} {selectedView.get()}
-          </Heading>
+        {selectedEvent.get() && <Stack flexGrow={1} spacing={6}>
+          <Stack>
+            <Heading>
+              {viewType.get()} {selectedView.get()}
+            </Heading>
+            <Text fontWeight='bold' color='gray.400'>
+              {viewType.get() == ViewType.Match ? 'teams' : 'matches'}:{' '}
+              {selectedEntries.get().length > 0 && (
+                selectedEntries.get().map((robotEntry, idx) => (
+                  <Text
+                    as='span'
+                    key={idx}
+                    color={
+                      getTBAMatch(robotEntry.matchNumber).alliances.red.team_keys.includes(`frc${robotEntry.teamNumber}`) ?
+                      'red.600' :
+                      'blue.600'
+                    }
+                  >
+                    {robotEntry[(viewType.get() == ViewType.Match ? 'team' : 'match') + 'Number']}
+                  </Text>
+                // @ts-ignore
+                )).reduce((acc, cur) => [acc, ', ', cur])
+              )}
+            </Text>
+          </Stack>
           <motion.svg
             width='648'
             height='360'
@@ -124,39 +155,39 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1 }}
           >
             { /* Field Outline */ }
-            <rect stroke='white' stroke-width='1.5' x='0' y='0' width='648' height='360'/>
+            <rect stroke='white' strokeWidth='1.5' x='0' y='0' width='648' height='360'/>
             { /* Auto Lines */ }
-            <line fill='none' stroke='red' stroke-width='1.5' x1='120' y1='0' x2='120' y2='360'/>
-            <line fill='none' stroke='blue' stroke-width='1.5' x1='528' y1='0' x2='528' y2='360'/>
+            <line fill='none' stroke={theme.colors.blue[600]} strokeWidth='1.5' x1='120' y1='0' x2='120' y2='360'/>
+            <line fill='none' stroke={theme.colors.red[600]} strokeWidth='1.5' x1='528' y1='0' x2='528' y2='360'/>
             { /* Switch Boxes */ }
-            <rect stroke='red' stroke-width='1.5' x='144' y='108' width='48' height='36'/>
-            <rect stroke='blue' stroke-width='1.5' x='144' y='216' width='48' height='36'/>
-            <rect stroke='red' stroke-width='1.5' x='456' y='108' width='48' height='36'/>
-            <rect stroke='blue' stroke-width='1.5' x='456' y='216' width='48' height='36'/>
+            <rect stroke={getPlatformColor(selectedView.get(), 0, true)} strokeWidth='1.5' x='144' y='108' width='48' height='36'/>
+            <rect stroke={getPlatformColor(selectedView.get(), 0, false)} strokeWidth='1.5' x='144' y='216' width='48' height='36'/>
+            <rect stroke={getPlatformColor(selectedView.get(), 2, true)} strokeWidth='1.5' x='456' y='108' width='48' height='36'/>
+            <rect stroke={getPlatformColor(selectedView.get(), 2, false)} strokeWidth='1.5' x='456' y='216' width='48' height='36'/>
             { /* Scale Boxes */ }
-            <rect stroke='red' stroke-width='1.5' x='300' y='72' width='48' height='36'/>
-            <rect stroke='blue' stroke-width='1.5' x='300' y='252' width='48' height='36'/>
+            <rect stroke={getPlatformColor(selectedView.get(), 1, true)} strokeWidth='1.5' x='300' y='72' width='48' height='36'/>
+            <rect stroke={getPlatformColor(selectedView.get(), 1, false)} strokeWidth='1.5' x='300' y='252' width='48' height='36'/>
             { /* Horizontal Platform Sides */ }
-            <rect stroke='gray' stroke-width='1.5' x='259' y='115.25' width='130' height='12.75'/>
-            <rect stroke='gray' stroke-width='1.5' x='259' y='232' width='130' height='12.75'/>
+            <rect stroke='gray' strokeWidth='1.5' x='259' y='115.25' width='130' height='12.75'/>
+            <rect stroke='gray' strokeWidth='1.5' x='259' y='232' width='130' height='12.75'/>
             { /* Vertical Platform Sides */ }
-            <rect stroke='gray' stroke-width='1.5' x='259' y='128' width='12.75' height='104'/>
-            <rect stroke='gray' stroke-width='1.5' x='376.25' y='128' width='12.75' height='104'/>
+            <rect stroke='gray' strokeWidth='1.5' x='259' y='128' width='12.75' height='104'/>
+            <rect stroke='gray' strokeWidth='1.5' x='376.25' y='128' width='12.75' height='104'/>
             { /* Switch Beams */ }
-            <rect stroke='gray' stroke-width='1.5' x='474' y='144' width='12' height='72'/>
-            <rect stroke='gray' stroke-width='1.5' x='162' y='144' width='12' height='72'/>
+            <rect stroke='gray' strokeWidth='1.5' x='474' y='144' width='12' height='72'/>
+            <rect stroke='gray' strokeWidth='1.5' x='162' y='144' width='12' height='72'/>
             { /* Scale Beam */ }
-            <rect stroke='gray' stroke-width='1.5' x='318' y='108.3125' width='12' height='143.5'/>
+            <rect stroke='gray' strokeWidth='1.5' x='318' y='108.3125' width='12' height='143.5'/>
             { /* Switch Bounds */ }
-            <line fill='none' stroke='gray' stroke-width='1.5' x1='456' y1='144' x2='456' y2='216'/>
-            <line fill='none' stroke='gray' stroke-width='1.5' x1='504' y1='144' x2='504' y2='216'/>
-            <line fill='none' stroke='gray' stroke-width='1.5' x1='144' y1='144' x2='144' y2='216'/>
-            <line fill='none' stroke='gray' stroke-width='1.5' x1='192' y1='144' x2='192' y2='216'/>
+            <line fill='none' stroke='gray' strokeWidth='1.5' x1='456' y1='144' x2='456' y2='216'/>
+            <line fill='none' stroke='gray' strokeWidth='1.5' x1='504' y1='144' x2='504' y2='216'/>
+            <line fill='none' stroke='gray' strokeWidth='1.5' x1='144' y1='144' x2='144' y2='216'/>
+            <line fill='none' stroke='gray' strokeWidth='1.5' x1='192' y1='144' x2='192' y2='216'/>
             { /* Exchange Zones */ }
-            <rect stroke='red' stroke-width='1.5' x='0' y='120' width='36' height='48'/>
-            <rect stroke='blue' stroke-width='1.5' x='612' y='192' width='36' height='48'/>
+            <rect stroke={theme.colors.blue[600]} strokeWidth='1.5' x='0' y='120' width='36' height='48'/>
+            <rect stroke={theme.colors.red[600]} strokeWidth='1.5' x='612' y='192' width='36' height='48'/>
           </motion.svg>
-        </Stack>
+        </Stack>}
       </Stack>
     </Container>
   ));
