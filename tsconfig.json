@@ -32,8 +32,14 @@
       "@/theme" : [
         "theme/index"
       ],
+      "@/styles" : [
+        "styles/index"
+      ],
       "@/types" : [
         "types/index"
+      ],
+      "@/utils" : [
+        "utils/index"
       ]
     }
   },

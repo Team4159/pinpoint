@@ -4,7 +4,6 @@ const Container: React.FC<FlexProps> = props => {
   return (
     <Flex
       direction='column'
-      alignItems='start'
       minHeight='100vh'
       backgroundColor='almostBlack'
       color='white'

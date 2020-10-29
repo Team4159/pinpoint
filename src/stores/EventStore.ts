@@ -9,7 +9,6 @@ class EventStore {
 
   @action.bound
   loadEvent(eventSlug: string): Promise<FRCEvent> {
-    console.log(this.events[eventSlug]);
     if (this.events[eventSlug] !== undefined) {
       return new Promise(resolve => {
         resolve(this.events[eventSlug]);
