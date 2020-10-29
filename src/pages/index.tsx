@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import {
+  Badge,
   Box,
-  Button,
   Heading,
   Select,
   Text,
@@ -183,25 +183,22 @@ const HomePage: React.FC = () => {
               <Heading>
                 {viewType.get()} {selectedView.get()}
               </Heading>
-              <Text fontWeight='bold' color='gray.400'>
-                {viewType.get() == ViewType.Match ? 'teams' : 'matches'}:{' '}
+              <Stack isInline alignItems='center' fontWeight='bold' color='gray.400'>
+                <Text>
+                  {viewType.get() == ViewType.Match ? 'teams' : 'matches'}:{' '}
+                </Text>
                 {
                   selectedEntries.get().map((robotEntry, idx) => (
-                    <Text
-                      as='span'
+                    <Badge
                       key={idx}
-                      color={
-                        getAllianceColor(robotEntry.matchNumber, robotEntry.teamNumber) == 'red' ?
-                        'red.600' :
-                        'blue.600'
-                      }
+                      variant='solid'
+                      colorScheme={getAllianceColor(robotEntry.matchNumber, robotEntry.teamNumber)}
                     >
                       {robotEntry[(viewType.get() == ViewType.Match ? 'team' : 'match') + 'Number']}
-                    </Text>
-                  // @ts-ignore
-                  )).reduce((acc, cur) => [acc, ', ', cur])
+                    </Badge>
+                  ))
                 }
-              </Text>
+              </Stack>
             </Stack>
             <svg
               width='648'
