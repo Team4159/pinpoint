@@ -212,12 +212,18 @@ const HomePage: React.FC = () => {
               <line fill='none' stroke={theme.colors.red[600]} strokeWidth='1.5' x1='528' y1='0' x2='528' y2='360'/>
               { /* Switch Boxes */ }
               <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 0, true) : theme.colors.blue[600]} strokeWidth='1.5' x='144' y='108' width='48' height='36'/>
-              <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 0, false) : theme.colors.red[600]} strokeWidth='1.5' x='144' y='216' width='48' height='36'/>
-              <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 2, true) : theme.colors.blue[600]} strokeWidth='1.5' x='456' y='108' width='48' height='36'/>
+              <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 0, false) : theme.colors.blue[600]} strokeWidth='1.5' x='144' y='216' width='48' height='36'/>
+              <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 2, true) : theme.colors.red[600]} strokeWidth='1.5' x='456' y='108' width='48' height='36'/>
               <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 2, false) : theme.colors.red[600]} strokeWidth='1.5' x='456' y='216' width='48' height='36'/>
               { /* Scale Boxes */ }
               <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 1, true) : theme.colors.blue[600]} strokeWidth='1.5' x='300' y='72' width='48' height='36'/>
-              <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 1, false) : theme.colors.red[600]} strokeWidth='1.5' x='300' y='252' width='48' height='36'/>
+              <rect stroke={viewType.get() == ViewType.Match ? getPlatformColor(selectedView.get(), 1, false) : theme.colors.blue[600]} strokeWidth='1.5' x='300' y='252' width='48' height='36'/>
+              {viewType.get() == ViewType.Team && (
+                <g>
+                  <rect stroke={theme.colors.red[600]} strokeWidth='1.5' strokeDasharray='0 24 60' x='300' y='72' width='48' height='36'/>
+                  <rect stroke={theme.colors.red[600]} strokeWidth='1.5' strokeDasharray='0 24 60' x='300' y='252' width='48' height='36'/>
+                </g>
+              )}
               { /* Horizontal Platform Sides */ }
               <rect stroke='gray' strokeWidth='1.5' x='259' y='115.25' width='130' height='12.75'/>
               <rect stroke='gray' strokeWidth='1.5' x='259' y='232' width='130' height='12.75'/>
