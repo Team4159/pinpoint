@@ -16,7 +16,7 @@ import Stack from '@/components/motion-stack';
 import Container from '@/components/container';
 import Header from '@/components/header';
 
-import { computed, observable } from 'mobx';
+import { computed, observable, IObservableValue } from 'mobx';
 import { useObserver } from 'mobx-react';
 import { EventContext } from '@/stores/EventStore';
 
@@ -115,7 +115,7 @@ const CubeDisplay: React.FC<{ numCubes: number  }> = ({ numCubes }) => (
     {Array(numCubes).fill(null).map(() => <PowerCube/>)}
   </Stack>
 );
-const BoolDisplay: React.FC<{ b: boolean  }> = ({ b }) => (
+const BoolDisplay: React.FC<{ b: boolean }> = ({ b }) => (
   <Flex justifyContent='center'>
     {b ? <CheckIcon color='green.600'/> : <CloseIcon color='red.600'/>}
   </Flex>
@@ -124,7 +124,9 @@ const BoolDisplay: React.FC<{ b: boolean  }> = ({ b }) => (
 const MatchScoringBreakdown: React.FC<{
   robotEntries: FRCRobotEntry[];
   tbaMatch: TBAMatch;
-}> = ({ robotEntries, tbaMatch }) => {
+  viewType: IObservableValue<ViewType>;
+  selectedView: IObservableValue<number>;
+}> = ({ robotEntries, tbaMatch, viewType, selectedView }) => {
   const theme = useTheme();
 
   return (
@@ -199,7 +201,14 @@ const MatchScoringBreakdown: React.FC<{
         </thead>
         <tbody>
           {robotEntries.map(robotEntry => (
-            <tr>
+            <Box
+              as='tr'
+              cursor='pointer'
+              onClick={() => {
+                viewType.set(ViewType.Team);
+                selectedView.set(robotEntry.teamNumber);
+              }}
+            >
               <Box
                 as='th'
                 color={`${getAllianceColor(tbaMatch, robotEntry.teamNumber)}.600`}
@@ -226,11 +235,17 @@ const MatchScoringBreakdown: React.FC<{
               </Box>
               <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.oppSwitchCubesTeleop}/></Box>
               <Box as='td' {...styles.cell}><BoolDisplay b={robotEntry.playedDefense}/></Box>
-            </tr>
+            </Box>
           ))}
         </tbody>
       </table>
     </Stack>
+  );
+};
+
+const TeamAnalysis: React.FC = () => {
+  return (
+    null
   );
 };
 
@@ -331,12 +346,19 @@ const HomePage: React.FC = () => {
               }}
             >
               {Object.keys(eventStore.events).length == 0 && (
-                <option value="">No Events Found</option>
+                <Box as='option' backgroundColor={theme.colors.gray[600]} value="">
+                  No Events Found
+                </Box>
               )}
               {Object.keys(eventStore.events).map((eventSlug) => (
-                <option key={eventSlug} value={eventSlug}>
+                <Box
+                  key={eventSlug}
+                  as='option'
+                  backgroundColor='gray.600'
+                  value={eventSlug}
+                >
                   {eventSlug}
-                </option>
+                </Box>
               ))}
             </Select>
           </Box>
@@ -358,8 +380,8 @@ const HomePage: React.FC = () => {
                 );
               }}
             >
-              <option value={ViewType.Match}>match</option>
-              <option value={ViewType.Team}>team</option>
+              <Box as='option' value={ViewType.Match}>match</Box>
+              <Box as='option' value={ViewType.Team}>team</Box>
             </Select>
           </Box>
           <Box>
@@ -372,9 +394,9 @@ const HomePage: React.FC = () => {
               onChange={(e) => selectedView.set(parseInt(e.target.value))}
             >
               {selectedViewIds.get().map((viewId) => (
-                <option key={viewId} value={viewId}>
+                <Box key={viewId} as='option' value={viewId}>
                   {viewId}
-                </option>
+                </Box>
               ))}
             </Select>
           </Box>
@@ -386,7 +408,7 @@ const HomePage: React.FC = () => {
             alignItems='center'
             spacing={6}
           >
-            <Stack>
+            <Stack alignItems='center'>
               <Stack isInline alignItems="center" spacing={4}>
                 <Heading>
                   {viewType.get()} {selectedView.get()}
@@ -675,11 +697,15 @@ const HomePage: React.FC = () => {
                 />
               ))}
             </svg>
-            {viewType.get() == ViewType.Match && (
+            {viewType.get() == ViewType.Match ? (
               <MatchScoringBreakdown
                 robotEntries={selectedEntries.get()}
                 tbaMatch={getTBAMatch(selectedView.get())}
+                viewType={viewType}
+                selectedView={selectedView}
               />
+            ) : (
+              null
             )}
           </Stack>
         )}
