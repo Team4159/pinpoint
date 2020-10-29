@@ -1,5 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
-import { Badge, Box, Heading, Select, Text, useTheme } from '@chakra-ui/core';
+import {
+  Badge,
+  Box,
+  Heading,
+  Image,
+  Link,
+  Select,
+  Text,
+  useTheme,
+} from '@chakra-ui/core';
 import { motion } from 'framer-motion';
 import Stack from '@/components/motion-stack';
 import Container from '@/components/container';
@@ -37,7 +46,8 @@ const pathToD = (coords: [number, number][]) =>
 const RobotPath: React.FC<{
   robotEntry: FRCRobotEntry;
   allianceColor: 'red' | 'blue';
-}> = ({ robotEntry, allianceColor }) => {
+  viewType: ViewType;
+}> = ({ allianceColor, robotEntry, viewType }) => {
   if (robotEntry.autonomousPath.length == 0) {
     return null;
   }
@@ -60,7 +70,7 @@ const RobotPath: React.FC<{
         x={Math.min(Math.max(path[0][1], 0), FIELD_DIMS.w - 40)}
         y={path[0][0] - 5}
       >
-        {robotEntry.teamNumber}
+        {robotEntry[(viewType == ViewType.Match ? 'team' : 'match') + 'Number']}
       </text>
       <motion.path
         initial={{ pathLength: 0 }}
@@ -226,9 +236,25 @@ const HomePage: React.FC = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Heading>
-                {viewType.get()} {selectedView.get()}
-              </Heading>
+              <Stack isInline alignItems="center" spacing={4}>
+                <Heading>
+                  {viewType.get()} {selectedView.get()}
+                </Heading>
+                <Link
+                  href={
+                    'https://thebluealliance.com/' +
+                    (viewType.get() == ViewType.Match
+                      ? `match/${selectedEventSlug.get()}_qm${selectedView.get()}`
+                      : `team/${selectedView.get()}/${selectedEventSlug
+                          .get()
+                          .slice(0, 4)}`)
+                  }
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <Image src="/tba_lamp.svg" height="25px" />
+                </Link>
+              </Stack>
               <Stack
                 isInline
                 alignItems="center"
@@ -257,7 +283,11 @@ const HomePage: React.FC = () => {
                 ))}
               </Stack>
             </Stack>
-            <svg width="648" height="360" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              style={{ maxWidth: '648px' }}
+              viewBox="0 0 648 360"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               {/* Field Outline */}
               <rect
                 stroke="white"
@@ -502,6 +532,7 @@ const HomePage: React.FC = () => {
                     robotEntry.matchNumber,
                     robotEntry.teamNumber
                   )}
+                  viewType={viewType.get()}
                 />
               ))}
             </svg>
