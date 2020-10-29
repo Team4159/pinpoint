@@ -107,15 +107,12 @@ const RobotPath: React.FC<{
 };
 
 const PowerCube: React.FC = () => (
-  <Image src='/power-cube.svg' boxSize={6}/>
+  <Image src='/power-cube.svg' boxSize={5}/>
 );
 
 const CubeDisplay: React.FC<{ numCubes: number  }> = ({ numCubes }) => (
   <Stack isInline spacing={1} justifyContent='center'>
-    <PowerCube/>
-    <Text>
-      x{numCubes}
-    </Text>
+    {Array(numCubes).fill(null).map(() => <PowerCube/>)}
   </Stack>
 );
 const BoolDisplay: React.FC<{ b: boolean  }> = ({ b }) => (
@@ -205,7 +202,7 @@ const MatchScoringBreakdown: React.FC<{
             <tr>
               <Box
                 as='th'
-                color={theme.colors[getAllianceColor(tbaMatch, robotEntry.teamNumber)][600]}
+                color={`${getAllianceColor(tbaMatch, robotEntry.teamNumber)}.600`}
                 {...styles.cell}
               >
                 {robotEntry.teamNumber}
