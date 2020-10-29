@@ -1,10 +1,10 @@
 import { ChakraProvider } from '@chakra-ui/core';
 
-import EventStore, { EventContext } from '@/stores/EventStore'
+import EventStore, { EventContext } from '@/stores/EventStore';
 
 import theme from '@/theme';
 
-import '../styles/base.css'
+import '../styles/base.css';
 
 const eventStore = new EventStore();
 

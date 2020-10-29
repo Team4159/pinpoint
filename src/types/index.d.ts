@@ -7,7 +7,7 @@ export type FRCEvent = {
 export type FRCRobotEntry = {
   matchNumber: number;
   teamNumber: number;
-  autonomousPath: Array<[number, number]>
+  autonomousPath: Array<[number, number]>;
   autoCrossLine: boolean;
   autoSwitchCubes: number;
   autoScaleCubes: number;
@@ -45,7 +45,7 @@ export type TBAMatch = {
     red: TBAScoreBreakdown;
     blue: TBAScoreBreakdown;
   };
-  winning_alliance: 'blue'|'red';
+  winning_alliance: 'blue' | 'red';
   event_key: string;
   time: number;
   predicted_time: number;

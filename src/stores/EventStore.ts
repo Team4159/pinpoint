@@ -10,27 +10,26 @@ class EventStore {
   @action.bound
   loadEvent(eventSlug: string): Promise<FRCEvent> {
     if (this.events[eventSlug] !== undefined) {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(this.events[eventSlug]);
       });
     }
-  
+
     return fetch(`/event_data/${eventSlug}.json`)
-      .then(res => res.json())
-      .then(eventData => {
+      .then((res) => res.json())
+      .then((eventData) => {
         this.events[eventSlug] = {
           slug: eventSlug,
           robotEntries: eventData.map(this.hydrateRobotEntry),
-          tba: {}
+          tba: {},
         };
       })
       .then(() => fetch(`/event_data/${eventSlug}_tba.json`))
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((tbaData: TBAMatch[]) => {
-        this.events[eventSlug].tba = Object.fromEntries(tbaData.map(tbaMatch => [
-          tbaMatch.key,
-          tbaMatch
-        ]));
+        this.events[eventSlug].tba = Object.fromEntries(
+          tbaData.map((tbaMatch) => [tbaMatch.key, tbaMatch])
+        );
         return this.events[eventSlug];
       });
   }

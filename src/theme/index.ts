@@ -1,9 +1,9 @@
-import { extendTheme } from '@chakra-ui/core'
+import { extendTheme } from '@chakra-ui/core';
 
 const customTheme = extendTheme({
   colors: {
-    almostBlack: '#0E0E10'
-  }
+    almostBlack: '#0E0E10',
+  },
 });
 
 export default customTheme;

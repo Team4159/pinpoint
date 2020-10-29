@@ -5,7 +5,7 @@ export const select: SelectProps = {
   borderColor: 'whiteAlpha.600',
 };
 
-export const button: ButtonProps  = {
+export const button: ButtonProps = {
   colorScheme: 'whiteAlpha',
   variant: 'outline',
 };

@@ -1,26 +1,22 @@
 import { Heading, Stack, StackProps } from '@chakra-ui/core';
 import Link from 'next/link';
 
-const Header: React.FC<StackProps> = props => {
+const Header: React.FC<StackProps> = (props) => {
   return (
     <Stack isInline {...props}>
-      <Link href='/'>
+      <Link href="/">
         <a>
-          <Heading>
-            view
-          </Heading>
+          <Heading>view</Heading>
         </a>
       </Link>
       <Heading>|</Heading>
-      <Link href='/scout'>
+      <Link href="/scout">
         <a>
-          <Heading>
-            scout
-          </Heading>
+          <Heading>scout</Heading>
         </a>
       </Link>
     </Stack>
   );
-}
+};
 
 export default Header;
