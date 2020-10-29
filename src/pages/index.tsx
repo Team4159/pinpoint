@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import {
   Badge,
   Box,
+  Flex,
   Heading,
   Image,
   Link,
@@ -10,6 +11,7 @@ import {
   useTheme,
 } from '@chakra-ui/core';
 import { motion } from 'framer-motion';
+import { CheckIcon, CloseIcon, UpDownIcon } from '@chakra-ui/icons';
 import Stack from '@/components/motion-stack';
 import Container from '@/components/container';
 import Header from '@/components/header';
@@ -22,12 +24,31 @@ import _ from 'lodash';
 
 import * as styles from '@/styles';
 
-import { FRCRobotEntry } from '@/types';
+import { FRCRobotEntry, TBAMatch } from '@/types';
 
 enum ViewType {
   Match = 'match',
   Team = 'team',
-}
+};
+
+const getPlatformColor = (
+  match: TBAMatch,
+  platformIndex: number,
+  left: boolean
+) =>
+  match.score_breakdown.blue.tba_gameData[
+      platformIndex
+  ]
+     === (left ? 'L' : 'R')
+      ? 'blue'
+      : 'red';
+  
+const getAllianceColor = (match: TBAMatch, teamNumber: number) =>
+  match.alliances.red.team_keys.includes(
+    `frc${teamNumber}`
+  )
+    ? 'red'
+    : 'blue';
 
 const FIELD_DIMS = { w: 648, h: 360 };
 
@@ -77,10 +98,142 @@ const RobotPath: React.FC<{
         animate={{ pathLength: 1, transition: { duration: 1 } }}
         stroke={theme.colors[allianceColor][600]}
         strokeDasharray={null}
+        strokeWidth="1.5"
         fill="none"
         d={pathToD(path)}
       />
     </g>
+  );
+};
+
+const PowerCube: React.FC = () => (
+  <Image src='/power-cube.svg' boxSize={6}/>
+);
+
+const CubeDisplay: React.FC<{ numCubes: number  }> = ({ numCubes }) => (
+  <Stack isInline spacing={1} justifyContent='center'>
+    <PowerCube/>
+    <Text>
+      x{numCubes}
+    </Text>
+  </Stack>
+);
+const BoolDisplay: React.FC<{ b: boolean  }> = ({ b }) => (
+  <Flex justifyContent='center'>
+    {b ? <CheckIcon color='green.600'/> : <CloseIcon color='red.600'/>}
+  </Flex>
+);
+
+const MatchScoringBreakdown: React.FC<{
+  robotEntries: FRCRobotEntry[];
+  tbaMatch: TBAMatch;
+}> = ({ robotEntries, tbaMatch }) => {
+  const theme = useTheme();
+
+  return (
+    <Stack
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      alignItems='center'
+    >
+      <Heading fontSize='3xl'>
+        scoring breakdown
+      </Heading>
+      <Stack isInline alignItems='center'>
+        <Heading color='red.600'>
+          {tbaMatch.alliances.red.score}
+        </Heading>
+        {tbaMatch.winning_alliance == 'red' && <CheckIcon color='green.600'/>}
+        <Heading>
+          -
+        </Heading>
+        <Heading color='blue.600'>
+          {tbaMatch.alliances.blue.score}
+        </Heading>
+        {tbaMatch.winning_alliance == 'blue' && <CheckIcon color='green.600'/>}
+      </Stack>
+      <table>
+        <thead>
+          <tr>
+            <Box as='th'/>
+            <Box as='th' {...styles.cell} colSpan={3}>
+              Autonomous
+            </Box>
+            <Box as='th' {...styles.cell} colSpan={3}>
+              Teleop
+            </Box>
+            <Box as='th' {...styles.cell} colSpan={1}>
+              Endgame
+            </Box>
+            <Box as='th' {...styles.cell} colSpan={2}>
+              Misc.
+            </Box>
+          </tr>
+          <tr>
+            <Box as='th'/>
+            <Box as='th' {...styles.cell}>
+              Scale
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Switch
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Line
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Scale
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Own Switch
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Opp. Switch
+            </Box>
+            <Box as='th' {...styles.cell}>
+             Climb
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Exchange
+            </Box>
+            <Box as='th' {...styles.cell}>
+              Defense
+            </Box>
+          </tr>
+        </thead>
+        <tbody>
+          {robotEntries.map(robotEntry => (
+            <tr>
+              <Box
+                as='th'
+                color={theme.colors[getAllianceColor(tbaMatch, robotEntry.teamNumber)][600]}
+                {...styles.cell}
+              >
+                {robotEntry.teamNumber}
+              </Box>
+              <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.autoScaleCubes}/></Box>
+              <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.autoSwitchCubes}/></Box>
+              <Box as='td' {...styles.cell}><BoolDisplay b={robotEntry.autoCrossLine}/></Box>
+              <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.scaleCubesTeleop}/></Box>
+              <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.ownSwitchCubesTeleop}/></Box>
+              <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.oppSwitchCubesTeleop}/></Box>
+              <Box as='td' {...styles.cell}>
+                <Stack isInline spacing={1} justifyContent='center'>
+                  {Array(
+                    robotEntry.singleClimb ? 1 :
+                      (robotEntry.climbWithOneBuddy ? 2 :
+                        robotEntry.climbWithTwoBuddies ? 3 : 0)
+                  ).fill(null).map(() => (
+                    <UpDownIcon color='white'/>
+                  ))}
+                </Stack>
+              </Box>
+              <Box as='td' {...styles.cell}><CubeDisplay numCubes={robotEntry.oppSwitchCubesTeleop}/></Box>
+              <Box as='td' {...styles.cell}><BoolDisplay b={robotEntry.playedDefense}/></Box>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Stack>
   );
 };
 
@@ -100,6 +253,9 @@ const HomePage: React.FC = () => {
   const selectedEvent = computed(
     () => eventStore.events[selectedEventSlug.get()]
   );
+
+  const getTBAMatch = (matchNumber: number) =>
+    selectedEvent.get().tba[`${selectedEventSlug.get()}_qm${matchNumber}`];
 
   const matchNumbers = computed(() =>
     _.uniq(
@@ -134,29 +290,25 @@ const HomePage: React.FC = () => {
             (robotEntry) =>
               robotEntry[viewType.get() + 'Number'] == selectedView
           )
+          .sort((a, b) => {
+            if (viewType.get() == ViewType.Team) {
+              return a.matchNumber - b.matchNumber;
+            } else {
+              const colors = {
+                red: 0,
+                blue: 1,
+              }
+              const aColor = getAllianceColor(getTBAMatch(a.matchNumber), a.teamNumber);
+              const bColor = getAllianceColor(getTBAMatch(b.matchNumber), b.teamNumber);
+              if (aColor == bColor) {
+                return a.teamNumber - b.teamNumber;
+              } else {
+                return colors[aColor] - colors[bColor];
+              }
+            }
+          })
       : []
   );
-
-  const getTBAMatch = (matchNumber: number) =>
-    selectedEvent.get().tba[`${selectedEventSlug.get()}_qm${matchNumber}`];
-  const getPlatformColor = (
-    matchNumber: number,
-    platformIndex: number,
-    left: boolean
-  ) =>
-    theme.colors[
-      getTBAMatch(matchNumber).score_breakdown.blue.tba_gameData[
-        platformIndex
-      ] === (left ? 'L' : 'R')
-        ? 'blue'
-        : 'red'
-    ][600];
-  const getAllianceColor = (matchNumber: number, teamNumber: number) =>
-    getTBAMatch(matchNumber).alliances.red.team_keys.includes(
-      `frc${teamNumber}`
-    )
-      ? 'red'
-      : 'blue';
 
   return useObserver(() => (
     <Container>
@@ -231,11 +383,13 @@ const HomePage: React.FC = () => {
           </Box>
         </Stack>
         {selectedEvent.get() && (
-          <Stack alignItems="start" flexGrow={1} spacing={6}>
-            <Stack
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+          <Stack
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            alignItems='center'
+            spacing={6}
+          >
+            <Stack>
               <Stack isInline alignItems="center" spacing={4}>
                 <Heading>
                   {viewType.get()} {selectedView.get()}
@@ -269,7 +423,7 @@ const HomePage: React.FC = () => {
                     key={idx}
                     variant="solid"
                     colorScheme={getAllianceColor(
-                      robotEntry.matchNumber,
+                      getTBAMatch(robotEntry.matchNumber),
                       robotEntry.teamNumber
                     )}
                   >
@@ -319,9 +473,7 @@ const HomePage: React.FC = () => {
               {/* Switch Boxes */}
               <rect
                 stroke={
-                  viewType.get() == ViewType.Match
-                    ? getPlatformColor(selectedView.get(), 0, true)
-                    : theme.colors.blue[600]
+                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 0, true) : 'blue'][600]
                 }
                 strokeWidth="1.5"
                 x="144"
@@ -331,9 +483,7 @@ const HomePage: React.FC = () => {
               />
               <rect
                 stroke={
-                  viewType.get() == ViewType.Match
-                    ? getPlatformColor(selectedView.get(), 0, false)
-                    : theme.colors.blue[600]
+                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 0, false) : 'blue'][600]
                 }
                 strokeWidth="1.5"
                 x="144"
@@ -343,9 +493,7 @@ const HomePage: React.FC = () => {
               />
               <rect
                 stroke={
-                  viewType.get() == ViewType.Match
-                    ? getPlatformColor(selectedView.get(), 2, true)
-                    : theme.colors.red[600]
+                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 2, true) : 'red'][600]
                 }
                 strokeWidth="1.5"
                 x="456"
@@ -355,9 +503,7 @@ const HomePage: React.FC = () => {
               />
               <rect
                 stroke={
-                  viewType.get() == ViewType.Match
-                    ? getPlatformColor(selectedView.get(), 2, false)
-                    : theme.colors.red[600]
+                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 2, false) : 'red'][600]
                 }
                 strokeWidth="1.5"
                 x="456"
@@ -368,9 +514,7 @@ const HomePage: React.FC = () => {
               {/* Scale Boxes */}
               <rect
                 stroke={
-                  viewType.get() == ViewType.Match
-                    ? getPlatformColor(selectedView.get(), 1, true)
-                    : theme.colors.blue[600]
+                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 1, true) : 'blue'][600]
                 }
                 strokeWidth="1.5"
                 x="300"
@@ -380,9 +524,7 @@ const HomePage: React.FC = () => {
               />
               <rect
                 stroke={
-                  viewType.get() == ViewType.Match
-                    ? getPlatformColor(selectedView.get(), 1, false)
-                    : theme.colors.blue[600]
+                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 1, false) : 'blue'][600]
                 }
                 strokeWidth="1.5"
                 x="300"
@@ -529,13 +671,19 @@ const HomePage: React.FC = () => {
                   }`}
                   robotEntry={robotEntry}
                   allianceColor={getAllianceColor(
-                    robotEntry.matchNumber,
+                    getTBAMatch(robotEntry.matchNumber),
                     robotEntry.teamNumber
                   )}
                   viewType={viewType.get()}
                 />
               ))}
             </svg>
+            {viewType.get() == ViewType.Match && (
+              <MatchScoringBreakdown
+                robotEntries={selectedEntries.get()}
+                tbaMatch={getTBAMatch(selectedView.get())}
+              />
+            )}
           </Stack>
         )}
       </Stack>
