@@ -107,7 +107,7 @@ const CubeDisplay: React.FC<{ numCubes: number }> = ({ numCubes }) => {
   return (
     <Stack isInline spacing={1} justifyContent="center" alignItems="center">
       {cubeIcons}
-      {numCubes > 3 && <Text>({numCubes % 1 == 0 ? numCubes : numCubes.toFixed(1)})</Text>}
+      {(numCubes > 3 || numCubes % 1 != 0) && <Text>({numCubes % 1 == 0 ? numCubes : numCubes.toFixed(1)})</Text>}
     </Stack>
   );
 };
@@ -264,6 +264,9 @@ const TeamAnalysis: React.FC<{
     robotEntries,
   ]);
 
+  const autoCubes = (robotEntry: FRCRobotEntry) => robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes;
+  const telopCubes = (robotEntry: FRCRobotEntry) => robotEntry.scaleCubesTeleop + robotEntry.oppSwitchCubesTeleop + robotEntry.ownSwitchCubesTeleop + robotEntry.exchangeCubes;
+
   return (
     <Stack
       initial={{ opacity: 0, y: -10 }}
@@ -275,18 +278,18 @@ const TeamAnalysis: React.FC<{
       <Stack isInline fontWeight="bold" spacing={6}>
         <Stack isInline alignItems="center">
           <Text>
-            Most Cubes Scored:
+            Highest:
           </Text>
           <CubeDisplay
-            numCubes={Math.max(...robotEntries.map(robotEntry => robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes))}
+            numCubes={Math.max(...robotEntries.map(autoCubes))}
           />
         </Stack>
         <Stack isInline alignItems="center">
           <Text>
-            Median Cubes Scored:
+            Median:
           </Text>
           <CubeDisplay
-            numCubes={median(robotEntries.map(robotEntry => robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes))}
+            numCubes={median(robotEntries.map(autoCubes))}
           />
         </Stack>
       </Stack>
@@ -337,20 +340,40 @@ const TeamAnalysis: React.FC<{
       <Stack isInline fontWeight="bold" alignItems="center" spacing={6}>
         <Stack isInline alignItems="center">
           <Text>
-            Most Cubes Scored:
+            Highest:
           </Text>
           <CubeDisplay
-            numCubes={Math.max(...robotEntries.map(robotEntry => robotEntry.scaleCubesTeleop + robotEntry.oppSwitchCubesTeleop + robotEntry.ownSwitchCubesTeleop))}
+            numCubes={Math.max(...robotEntries.map(telopCubes))}
           />
         </Stack>
         <Stack isInline alignItems="center">
           <Text>
-            Median Cubes Scored:
+            Median:
           </Text>
           <CubeDisplay
-            numCubes={median(robotEntries.map(robotEntry => robotEntry.scaleCubesTeleop + robotEntry.oppSwitchCubesTeleop + robotEntry.ownSwitchCubesTeleop))}
+            numCubes={median(robotEntries.map(telopCubes))}
           />
         </Stack>
+      </Stack>
+      <Stack isInline justifyContent="center" spacing={6} flexWrap="wrap">
+        {Object.keys(behaviors.teleopBehaviors)
+          .sort((a, b) => behaviors.teleopBehaviors[b].length - behaviors.teleopBehaviors[a].length)
+          .map((teleopBehavior, idx) => (
+            <Stack key={idx} alignItems="center" fontWeight="bold" textAlign="center" border="1px solid" borderColor="whiteAlpha.600" rounded="md" paddingX={4} paddingY={2} marginBottom={6}>
+              <Text>{teleopBehavior}</Text>
+              <Stack isInline>
+                <Text>AVG: </Text>
+                <CubeDisplay
+                  numCubes={behaviors.teleopBehaviors[teleopBehavior].map(telopCubes).reduce((acc, cur) => acc + cur, 0) / behaviors.teleopBehaviors[teleopBehavior].length}
+                />
+              </Stack>
+              <Text>
+                {behaviors.teleopBehaviors[teleopBehavior].length} /{' '}
+                {robotEntries.length}
+              </Text>
+            </Stack>
+          ))
+        }
       </Stack>
     </Stack>
   );

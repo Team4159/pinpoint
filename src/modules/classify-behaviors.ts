@@ -5,12 +5,6 @@ type BehaviorClass = {
   name: string | ((robotEntry: FRCRobotEntry) => string);
 };
 
-const numsToWords = {
-  1: 'Single',
-  2: 'Double',
-  3: 'Triple',
-};
-
 const autoClasses: BehaviorClass[] = [
   {
     test: (robotEntry) =>
@@ -34,32 +28,54 @@ const autoClasses: BehaviorClass[] = [
   }
 ];
 
+const teleopClasses: BehaviorClass[] = [
+  {
+    test: (robotEntry) => robotEntry.playedDefense,
+    name: (robotEntry) => `Defense ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+  },
+  {
+    test: (robotEntry) => robotEntry.scaleCubesTeleop >= (robotEntry.ownSwitchCubesTeleop) && robotEntry.scaleCubesTeleop > 0,
+    name: 'Scale',
+  },
+  {
+    test: (robotEntry) => robotEntry.ownSwitchCubesTeleop > 0,
+    name: (robotEntry) => `Own Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+  },
+  {
+    test: (robotEntry) => robotEntry.oppSwitchCubesTeleop > 0,
+    name: (robotEntry) => `Opp. Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+  },
+  {
+    test: (robotEntry) => robotEntry.exchangeCubes > 0,
+    name: 'Exchange',
+  },
+];
+
+const identifyBehavior = (behaviorClasses: BehaviorClass[], robotEntry: FRCRobotEntry) => {
+  for (let behaviorClass of behaviorClasses) {
+    if (behaviorClass.test(robotEntry)) {
+      return typeof behaviorClass.name == 'function'
+        ? behaviorClass.name(robotEntry)
+        : behaviorClass.name;
+    }
+  }
+  return 'Unknown';
+}
+
 const classifyBehaviors = (robotEntries: FRCRobotEntry[]) => {
   const autoBehaviors: { [key: string]: FRCRobotEntry[] } = {};
   const teleopBehaviors = {};
 
   for (let robotEntry of robotEntries) {
-    let found = false;
-    for (let autoClass of autoClasses) {
-      if (autoClass.test(robotEntry)) {
-        const autoBehavior =
-          typeof autoClass.name == 'function'
-            ? autoClass.name(robotEntry)
-            : autoClass.name;
-        if (!Object.keys(autoBehaviors).includes(autoBehavior)) {
-          autoBehaviors[autoBehavior] = [];
-        }
-        autoBehaviors[autoBehavior].push(robotEntry);
-        found = true;
-        break;
-      }
+    const autoBehavior = identifyBehavior(autoClasses, robotEntry);
+    if (!Object.keys(autoBehaviors).includes(autoBehavior)) {
+      autoBehaviors[autoBehavior] = [];
     }
-    if (!found) {
-      if (!Object.keys(autoBehaviors).includes('Unknown')) {
-        autoBehaviors['Unknown'] = [];
-      }
-      autoBehaviors['Unknown'].push(robotEntry);
+    const teleopBehavior = identifyBehavior(teleopClasses, robotEntry);
+    if (!Object.keys(teleopBehaviors).includes(teleopBehavior)) {
+      teleopBehaviors[teleopBehavior] = [];
     }
+    teleopBehaviors[teleopBehavior].push(robotEntry);
   }
 
   return {
