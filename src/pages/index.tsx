@@ -246,6 +246,7 @@ const TeamAnalysis: React.FC<{
                     />
                   );
                 })}
+                <line x1="323.5" x2="323.5" y1="0" y2="360" stroke="gray" strokeWidth="1.5"/>
               </PlayingField>
               <Text>
                 {autoBehavior}
