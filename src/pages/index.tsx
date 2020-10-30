@@ -77,7 +77,7 @@ const RobotPath: React.FC<{
 };
 
 const PowerCube: React.FC<ImageProps> = (props) => (
-  <Image src='/power-cube.svg' boxSize={5} {...props}/>
+  <Image src={process.env.PREFIX_PATH + '/power-cube.svg'} boxSize={5} {...props}/>
 );
 
 const CubeDisplay: React.FC<{ numCubes: number }> = ({ numCubes }) => {
@@ -453,7 +453,7 @@ const HomePage: React.FC = () => {
                   rel="noopener noreferrer"
                   target="_blank"
                 >
-                  <Image src="/tba_lamp.svg" height="25px" />
+                  <Image src={process.env.PREFIX_PATH + '/tba_lamp.svg'} height="25px" />
                 </Link>
               </Stack>
               <Stack
