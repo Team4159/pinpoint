@@ -79,6 +79,7 @@ const classifyBehaviors = (robotEntries: FRCRobotEntry[]) => {
     if (!Object.keys(autoBehaviors).includes(autoBehavior)) {
       autoBehaviors[autoBehavior] = [];
     }
+    autoBehaviors[autoBehavior].push(robotEntry);
     const teleopBehavior = identifyBehavior(teleopClasses, robotEntry);
     if (!Object.keys(teleopBehaviors).includes(teleopBehavior)) {
       teleopBehaviors[teleopBehavior] = [];
