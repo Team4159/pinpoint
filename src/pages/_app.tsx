@@ -4,7 +4,7 @@ import EventStore, { EventContext } from '@/stores/EventStore';
 
 import theme from '@/theme';
 
-import '../styles/base.css';
+import '@/styles/base.css';
 
 const eventStore = new EventStore();
 

@@ -1,4 +1,4 @@
-import { SVGProps, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
@@ -418,7 +418,6 @@ const HomePage: React.FC = () => {
               {Object.keys(eventStore.events).length == 0 && (
                 <Box
                   as="option"
-                  backgroundColor={theme.colors.gray[600]}
                   value=""
                 >
                   No Events Found
@@ -428,7 +427,6 @@ const HomePage: React.FC = () => {
                 <Box
                   key={eventSlug}
                   as="option"
-                  backgroundColor="gray.600"
                   value={eventSlug}
                 >
                   {eventSlug}
