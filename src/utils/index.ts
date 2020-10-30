@@ -1,11 +1,11 @@
 import { TBAMatch } from '@/types';
 
 export const getPlatformColor = (
-  match: TBAMatch,
+  gameData: 'LLL'|'RRR'|'RRL'|'RLL'|'LLL'|'LRR'|'LLR',
   platformIndex: number,
   left: boolean
 ) =>
-  match.score_breakdown.blue.tba_gameData[
+  gameData[
       platformIndex
   ]
      === (left ? 'L' : 'R')

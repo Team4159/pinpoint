@@ -29,7 +29,7 @@ type TBAAlliance = {
 };
 
 type TBAScoreBreakdown = {
-  tba_gameData: string;
+  tba_gameData: 'LLL'|'RRR'|'RRL'|'RLL'|'LLL'|'LRR'|'LLR';
 };
 
 export type TBAMatch = {

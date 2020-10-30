@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { SVGProps, useContext, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
@@ -13,6 +13,7 @@ import {
 import { motion } from 'framer-motion';
 import { CheckIcon, CloseIcon, UpDownIcon } from '@chakra-ui/icons';
 import Stack from '@/components/motion-stack';
+import PlayingField from '@/components/playing-field';
 import Container from '@/components/container';
 import Header from '@/components/header';
 
@@ -21,7 +22,7 @@ import { useObserver } from 'mobx-react';
 import { EventContext } from '@/stores/EventStore';
 
 import _ from 'lodash';
-import { getPlatformColor, getAllianceColor, FIELD_DIMS, transformCoordinates, pathToD } from '@/utils';
+import { getAllianceColor, FIELD_DIMS, transformCoordinates, pathToD } from '@/utils';
 import classifyBehaviors from '@/modules/classify-behaviors';
 
 import * as styles from '@/styles';
@@ -35,17 +36,16 @@ enum ViewType {
 
 const RobotPath: React.FC<{
   robotEntry: FRCRobotEntry;
-  allianceColor: 'red' | 'blue';
+  color: string;
+  isFlipped?: boolean;
   viewType: ViewType;
-}> = ({ allianceColor, robotEntry, viewType }) => {
+}> = ({ isFlipped = false, color, robotEntry, viewType }) => {
   if (robotEntry.autonomousPath.length == 0) {
     return null;
   }
 
-  const theme = useTheme();
-
   const path: [number, number][] =
-    allianceColor == 'blue'
+    !isFlipped
       ? robotEntry.autonomousPath
           .map(transformCoordinates)
           .map(([y, x]) => [y, FIELD_DIMS.w - x])
@@ -56,7 +56,7 @@ const RobotPath: React.FC<{
   return (
     <g>
       <text
-        fill={theme.colors[allianceColor][600]}
+        fill={color}
         x={Math.min(Math.max(path[0][1], 0), FIELD_DIMS.w - 40)}
         y={path[0][0] - 5}
       >
@@ -65,7 +65,7 @@ const RobotPath: React.FC<{
       <motion.path
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1, transition: { duration: 1 } }}
-        stroke={theme.colors[allianceColor][600]}
+        stroke={color}
         strokeDasharray={null}
         strokeWidth="1.5"
         fill="none"
@@ -229,35 +229,24 @@ const TeamAnalysis: React.FC<{
       </Heading>
       <Stack isInline spacing={12}>
         {
-          Object.keys(behaviors.autoBehaviors).map(autoBehavior => (
-            <Stack alignItems='center' fontWeight='bold'>
-              <svg width="150" viewBox="0 0 150 150">
-                <rect width="150" height="150" stroke="white" strokeWidth="1.5"/>
-                {behaviors.autoBehaviors[autoBehavior].map((robotEntry, idx) => {
+          Object.keys(behaviors.autoBehaviors).map((autoBehavior, idx) => (
+            <Stack key={idx} alignItems='center' fontWeight='bold'>
+              <PlayingField height='150' width='135' colorScheme='split' viewBox='0 0 324 360'>
+                {behaviors.autoBehaviors[autoBehavior].map(robotEntry => {
                   if (robotEntry.autonomousPath.length == 0) {
                     return null;
                   }
 
-                  const minY = Math.min(...robotEntry.autonomousPath.map(coord => coord[0]));
-                  const minX = Math.min(...robotEntry.autonomousPath.map(coord => coord[1]));
-                  const maxY = Math.max(...robotEntry.autonomousPath.map(coord => coord[0]));
-                  const maxX = Math.max(...robotEntry.autonomousPath.map(coord => coord[1]));
-
-                  const scalingFactor = Math.min(150 / (maxX - minX), 150 / (maxY - minY));
-                  console.log(robotEntry.autonomousPath);
                   return (
-                    <motion.path
+                    <RobotPath
                       key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
-                      stroke="yellow"
-                      strokeWidth="1.5"
-                      fill="none"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1, transition: { duration: 5 } }}
-                      d={pathToD(robotEntry.autonomousPath.map(([y, x]) => [(y - minY + 50) * scalingFactor, (x - minX) * scalingFactor]))}
+                      robotEntry={robotEntry}
+                      color='yellow'
+                      viewType={viewType.get()}
                     />
                   );
                 })}
-              </svg>
+              </PlayingField>
               <Text>
                 {autoBehavior}
               </Text>
@@ -487,247 +476,27 @@ const HomePage: React.FC = () => {
                 ))}
               </Stack>
             </Stack>
-            <svg
-              style={{ maxWidth: '648px' }}
-              viewBox="0 0 648 360"
-              xmlns="http://www.w3.org/2000/svg"
+            <PlayingField
+              colorScheme={viewType.get() === ViewType.Team ? 'split' : getTBAMatch(selectedView.get()).score_breakdown.blue.tba_gameData}
             >
-              {/* Field Outline */}
-              <rect
-                stroke="white"
-                strokeWidth="1.5"
-                x="0"
-                y="0"
-                width="648"
-                height="360"
-              />
-              {/* Auto Lines */}
-              <line
-                fill="none"
-                stroke={theme.colors.blue[600]}
-                strokeWidth="1.5"
-                x1="120"
-                y1="0"
-                x2="120"
-                y2="360"
-              />
-              <line
-                fill="none"
-                stroke={theme.colors.red[600]}
-                strokeWidth="1.5"
-                x1="528"
-                y1="0"
-                x2="528"
-                y2="360"
-              />
-              {/* Switch Boxes */}
-              <rect
-                stroke={
-                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 0, true) : 'blue'][600]
-                }
-                strokeWidth="1.5"
-                x="144"
-                y="108"
-                width="48"
-                height="36"
-              />
-              <rect
-                stroke={
-                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 0, false) : 'blue'][600]
-                }
-                strokeWidth="1.5"
-                x="144"
-                y="216"
-                width="48"
-                height="36"
-              />
-              <rect
-                stroke={
-                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 2, true) : 'red'][600]
-                }
-                strokeWidth="1.5"
-                x="456"
-                y="108"
-                width="48"
-                height="36"
-              />
-              <rect
-                stroke={
-                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 2, false) : 'red'][600]
-                }
-                strokeWidth="1.5"
-                x="456"
-                y="216"
-                width="48"
-                height="36"
-              />
-              {/* Scale Boxes */}
-              <rect
-                stroke={
-                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 1, true) : 'blue'][600]
-                }
-                strokeWidth="1.5"
-                x="300"
-                y="72"
-                width="48"
-                height="36"
-              />
-              <rect
-                stroke={
-                  theme.colors[viewType.get() == ViewType.Match ? getPlatformColor(getTBAMatch(selectedView.get()), 1, false) : 'blue'][600]
-                }
-                strokeWidth="1.5"
-                x="300"
-                y="252"
-                width="48"
-                height="36"
-              />
-              {viewType.get() == ViewType.Team && (
-                <g>
-                  <rect
-                    stroke={theme.colors.red[600]}
-                    strokeWidth="1.5"
-                    strokeDasharray="0 24 60"
-                    x="300"
-                    y="72"
-                    width="48"
-                    height="36"
-                  />
-                  <rect
-                    stroke={theme.colors.red[600]}
-                    strokeWidth="1.5"
-                    strokeDasharray="0 24 60"
-                    x="300"
-                    y="252"
-                    width="48"
-                    height="36"
-                  />
-                </g>
-              )}
-              {/* Horizontal Platform Sides */}
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="259"
-                y="115.25"
-                width="130"
-                height="12.75"
-              />
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="259"
-                y="232"
-                width="130"
-                height="12.75"
-              />
-              {/* Vertical Platform Sides */}
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="259"
-                y="128"
-                width="12.75"
-                height="104"
-              />
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="376.25"
-                y="128"
-                width="12.75"
-                height="104"
-              />
-              {/* Switch Beams */}
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="474"
-                y="144"
-                width="12"
-                height="72"
-              />
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="162"
-                y="144"
-                width="12"
-                height="72"
-              />
-              {/* Scale Beam */}
-              <rect
-                stroke="gray"
-                strokeWidth="1.5"
-                x="318"
-                y="108.3125"
-                width="12"
-                height="143.5"
-              />
-              {/* Switch Bounds */}
-              <line
-                stroke="gray"
-                strokeWidth="1.5"
-                x1="456"
-                y1="144"
-                x2="456"
-                y2="216"
-              />
-              <line
-                stroke="gray"
-                strokeWidth="1.5"
-                x1="504"
-                y1="144"
-                x2="504"
-                y2="216"
-              />
-              <line
-                stroke="gray"
-                strokeWidth="1.5"
-                x1="144"
-                y1="144"
-                x2="144"
-                y2="216"
-              />
-              <line
-                stroke="gray"
-                strokeWidth="1.5"
-                x1="192"
-                y1="144"
-                x2="192"
-                y2="216"
-              />
-              {/* Exchange Zones */}
-              <rect
-                stroke={theme.colors.blue[600]}
-                strokeWidth="1.5"
-                x="0"
-                y="120"
-                width="36"
-                height="48"
-              />
-              <rect
-                stroke={theme.colors.red[600]}
-                strokeWidth="1.5"
-                x="612"
-                y="192"
-                width="36"
-                height="48"
-              />
               {selectedEntries.get().map((robotEntry) => (
                 <RobotPath
                   key={`${selectedEventSlug.get()}${robotEntry.matchNumber}${
                     robotEntry.teamNumber
                   }`}
                   robotEntry={robotEntry}
-                  allianceColor={getAllianceColor(
+                  isFlipped={getAllianceColor(
                     getTBAMatch(robotEntry.matchNumber),
                     robotEntry.teamNumber
-                  )}
+                  ) == 'red'}
+                  color={theme.colors[getAllianceColor(
+                    getTBAMatch(robotEntry.matchNumber),
+                    robotEntry.teamNumber
+                  )][600]}
                   viewType={viewType.get()}
                 />
               ))}
-            </svg>
+            </PlayingField>
             {viewType.get() == ViewType.Match ? (
               <MatchScoringBreakdown
                 robotEntries={selectedEntries.get()}
