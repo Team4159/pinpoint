@@ -5,6 +5,7 @@ import {
   Flex,
   Heading,
   Image,
+  ImageProps,
   Link,
   Select,
   Text,
@@ -75,15 +76,29 @@ const RobotPath: React.FC<{
   );
 };
 
-const PowerCube: React.FC = () => (
-  <Image src='/power-cube.svg' boxSize={5}/>
+const PowerCube: React.FC<ImageProps> = (props) => (
+  <Image src='/power-cube.svg' boxSize={5} {...props}/>
 );
 
-const CubeDisplay: React.FC<{ numCubes: number  }> = ({ numCubes }) => (
-  <Stack isInline spacing={1} justifyContent='center'>
-    {Array(numCubes).fill(null).map((_, idx) => <PowerCube key={idx}/>)}
-  </Stack>
-);
+const CubeDisplay: React.FC<{ numCubes: number }> = ({ numCubes }) => {
+  const cubeIcons = Array(Math.floor(numCubes)).fill(null).map((_, idx) => <PowerCube key={idx}/>);
+  if (numCubes % 1 != 0) {
+    cubeIcons.push(
+      <PowerCube
+        key={numCubes}
+        css={{
+          clipPath: `inset(0px ${(1 - numCubes % 1) * 100}% 0px 0px)`
+        }}
+      />
+    );
+  } 
+
+  return (
+    <Stack isInline spacing={1} justifyContent='center'>
+      {cubeIcons}
+    </Stack>
+  );
+};
 const BoolDisplay: React.FC<{ b: boolean }> = ({ b }) => (
   <Flex justifyContent='center'>
     {b ? <CheckIcon color='green.600'/> : <CloseIcon color='red.600'/>}
