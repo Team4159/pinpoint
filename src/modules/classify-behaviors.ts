@@ -31,11 +31,7 @@ const autoClasses: BehaviorClass[] = [
   {
     test: (robotEntry) => robotEntry.autoCrossLine,
     name: 'Only Cross Auto Line',
-  },
-  {
-    test: (robotEntry) => robotEntry.autonomousPath.length == 0,
-    name: 'No Auto',
-  },
+  }
 ];
 
 const classifyBehaviors = (robotEntries: FRCRobotEntry[]) => {
@@ -43,6 +39,7 @@ const classifyBehaviors = (robotEntries: FRCRobotEntry[]) => {
   const teleopBehaviors = {};
 
   for (let robotEntry of robotEntries) {
+    let found = false;
     for (let autoClass of autoClasses) {
       if (autoClass.test(robotEntry)) {
         const autoBehavior =
@@ -53,8 +50,15 @@ const classifyBehaviors = (robotEntries: FRCRobotEntry[]) => {
           autoBehaviors[autoBehavior] = [];
         }
         autoBehaviors[autoBehavior].push(robotEntry);
+        found = true;
         break;
       }
+    }
+    if (!found) {
+      if (!Object.keys(autoBehaviors).includes('Unknown')) {
+        autoBehaviors['Unknown'] = [];
+      }
+      autoBehaviors['Unknown'].push(robotEntry);
     }
   }
 

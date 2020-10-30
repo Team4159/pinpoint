@@ -41,20 +41,20 @@ enum ViewType {
 }
 
 const RobotPath: React.FC<{
-  robotEntry: FRCRobotEntry;
+  label: string;
   color: string;
   isFlipped?: boolean;
-  viewType: ViewType;
-}> = ({ isFlipped = false, color, robotEntry, viewType }) => {
-  if (robotEntry.autonomousPath.length == 0) {
+  path: [number, number][];
+}> = ({ label, color, isFlipped = false, path }) => {
+  if (path.length == 0) {
     return null;
   }
 
-  const path: [number, number][] = !isFlipped
-    ? robotEntry.autonomousPath
+  const transformedPath: [number, number][] = !isFlipped
+    ? path
         .map(transformCoordinates)
         .map(([y, x]) => [y, FIELD_DIMS.w - x])
-    : robotEntry.autonomousPath
+    : path
         .map(transformCoordinates)
         .map(([y, x]) => [FIELD_DIMS.h - y, x]);
 
@@ -62,10 +62,10 @@ const RobotPath: React.FC<{
     <g>
       <text
         fill={color}
-        x={Math.min(Math.max(path[0][1], 0), FIELD_DIMS.w - 40)}
-        y={path[0][0] - 5}
+        x={Math.min(Math.max(transformedPath[0][1], 0), FIELD_DIMS.w - 40)}
+        y={transformedPath[0][0] - 5}
       >
-        {robotEntry[(viewType == ViewType.Match ? 'team' : 'match') + 'Number']}
+        {label}
       </text>
       <motion.path
         initial={{ pathLength: 0 }}
@@ -74,7 +74,7 @@ const RobotPath: React.FC<{
         strokeDasharray={null}
         strokeWidth="1.5"
         fill="none"
-        d={pathToD(path)}
+        d={pathToD(transformedPath)}
       />
     </g>
   );
@@ -267,47 +267,51 @@ const TeamAnalysis: React.FC<{
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       alignItems="center"
+      spacing={6}
     >
-      <Heading fontSize="3xl">analysis</Heading>
+      <Heading fontSize="3xl">auto behaviors</Heading>
       <Stack isInline spacing={12}>
-        {Object.keys(behaviors.autoBehaviors).map((autoBehavior, idx) => (
-          <Stack key={idx} alignItems="center" fontWeight="bold">
-            <PlayingField
-              height="150"
-              width="135"
-              colorScheme="split"
-              viewBox="0 0 324 360"
-            >
-              {behaviors.autoBehaviors[autoBehavior].map((robotEntry) => {
-                if (robotEntry.autonomousPath.length == 0) {
-                  return null;
-                }
+        {Object.keys(behaviors.autoBehaviors)
+          .sort((a, b) => behaviors.autoBehaviors[b].length - behaviors.autoBehaviors[a].length)
+          .map((autoBehavior, idx) => (
+            <Stack key={idx} alignItems="center" fontWeight="bold">
+              <PlayingField
+                height="150"
+                width="135"
+                colorScheme="split"
+                viewBox="0 0 324 360"
+              >
+                {behaviors.autoBehaviors[autoBehavior].map((robotEntry) => {
+                  if (robotEntry.autonomousPath.length == 0) {
+                    return null;
+                  }
 
-                return (
-                  <RobotPath
-                    key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
-                    robotEntry={robotEntry}
-                    color="yellow"
-                    viewType={viewType.get()}
-                  />
-                );
-              })}
-              <line
-                x1="323.5"
-                x2="323.5"
-                y1="0"
-                y2="360"
-                stroke="gray"
-                strokeWidth="1.5"
-              />
-            </PlayingField>
-            <Text>{autoBehavior}</Text>
-            <Text>
-              {behaviors.autoBehaviors[autoBehavior].length} /{' '}
-              {robotEntries.length}
-            </Text>
-          </Stack>
-        ))}
+                  return (
+                    <RobotPath
+                      key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
+                      label={robotEntry.matchNumber.toString()}
+                      color='yellow'
+                      path={robotEntry.autonomousPath}
+                    />
+                  );
+                })}
+                <line
+                  x1="323.5"
+                  x2="323.5"
+                  y1="0"
+                  y2="360"
+                  stroke="gray"
+                  strokeWidth="1.5"
+                />
+              </PlayingField>
+              <Text>{autoBehavior}</Text>
+              <Text>
+                {behaviors.autoBehaviors[autoBehavior].length} /{' '}
+                {robotEntries.length}
+              </Text>
+            </Stack>
+          ))
+        }
       </Stack>
     </Stack>
   );
@@ -563,7 +567,6 @@ const HomePage: React.FC = () => {
                   key={`${selectedEventSlug.get()}${robotEntry.matchNumber}${
                     robotEntry.teamNumber
                   }`}
-                  robotEntry={robotEntry}
                   isFlipped={
                     getAllianceColor(
                       getTBAMatch(robotEntry.matchNumber),
@@ -578,12 +581,17 @@ const HomePage: React.FC = () => {
                       )
                     ][600]
                   }
-                  viewType={viewType.get()}
+                  label={robotEntry[
+                    (viewType.get() == ViewType.Match ? 'team' : 'match') +
+                      'Number'
+                  ].toString()}
+                  path={robotEntry.autonomousPath}
                 />
               ))}
             </PlayingField>
             {viewType.get() == ViewType.Match ? (
               <MatchScoringBreakdown
+                key={selectedView.get()}
                 robotEntries={selectedEntries.get()}
                 tbaMatch={getTBAMatch(selectedView.get())}
                 viewType={viewType}
@@ -591,6 +599,7 @@ const HomePage: React.FC = () => {
               />
             ) : (
               <TeamAnalysis
+                key={selectedView.get()}
                 robotEntries={selectedEntries.get()}
                 viewType={viewType}
                 selectedView={selectedView}
