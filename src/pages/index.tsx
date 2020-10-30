@@ -52,12 +52,8 @@ const RobotPath: React.FC<{
   }
 
   const transformedPath: [number, number][] = !isFlipped
-    ? path
-        .map(transformCoordinates)
-        .map(([y, x]) => [y, FIELD_DIMS.w - x])
-    : path
-        .map(transformCoordinates)
-        .map(([y, x]) => [FIELD_DIMS.h - y, x]);
+    ? path.map(transformCoordinates).map(([y, x]) => [y, FIELD_DIMS.w - x])
+    : path.map(transformCoordinates).map(([y, x]) => [FIELD_DIMS.h - y, x]);
 
   return (
     <g>
@@ -107,7 +103,9 @@ const CubeDisplay: React.FC<{ numCubes: number }> = ({ numCubes }) => {
   return (
     <Stack isInline spacing={1} justifyContent="center" alignItems="center">
       {cubeIcons}
-      {(numCubes > 3 || numCubes % 1 != 0) && <Text>({numCubes % 1 == 0 ? numCubes : numCubes.toFixed(1)})</Text>}
+      {(numCubes > 3 || numCubes % 1 != 0) && (
+        <Text>({numCubes % 1 == 0 ? numCubes : numCubes.toFixed(1)})</Text>
+      )}
     </Stack>
   );
 };
@@ -264,8 +262,13 @@ const TeamAnalysis: React.FC<{
     robotEntries,
   ]);
 
-  const autoCubes = (robotEntry: FRCRobotEntry) => robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes;
-  const telopCubes = (robotEntry: FRCRobotEntry) => robotEntry.scaleCubesTeleop + robotEntry.oppSwitchCubesTeleop + robotEntry.ownSwitchCubesTeleop + robotEntry.exchangeCubes;
+  const autoCubes = (robotEntry: FRCRobotEntry) =>
+    robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes;
+  const telopCubes = (robotEntry: FRCRobotEntry) =>
+    robotEntry.scaleCubesTeleop +
+    robotEntry.oppSwitchCubesTeleop +
+    robotEntry.ownSwitchCubesTeleop +
+    robotEntry.exchangeCubes;
 
   return (
     <Stack
@@ -277,27 +280,28 @@ const TeamAnalysis: React.FC<{
       <Heading fontSize="3xl">autonomous</Heading>
       <Stack isInline fontWeight="bold" spacing={6}>
         <Stack isInline alignItems="center">
-          <Text>
-            Highest:
-          </Text>
-          <CubeDisplay
-            numCubes={Math.max(...robotEntries.map(autoCubes))}
-          />
+          <Text>Highest:</Text>
+          <CubeDisplay numCubes={Math.max(...robotEntries.map(autoCubes))} />
         </Stack>
         <Stack isInline alignItems="center">
-          <Text>
-            Median:
-          </Text>
-          <CubeDisplay
-            numCubes={median(robotEntries.map(autoCubes))}
-          />
+          <Text>Median:</Text>
+          <CubeDisplay numCubes={median(robotEntries.map(autoCubes))} />
         </Stack>
       </Stack>
       <Stack isInline spacing={12}>
         {Object.keys(behaviors.autoBehaviors)
-          .sort((a, b) => behaviors.autoBehaviors[b].length - behaviors.autoBehaviors[a].length)
+          .sort(
+            (a, b) =>
+              behaviors.autoBehaviors[b].length -
+              behaviors.autoBehaviors[a].length
+          )
           .map((autoBehavior, idx) => (
-            <Stack key={idx} alignItems="center" fontWeight="bold" textAlign="center">
+            <Stack
+              key={idx}
+              alignItems="center"
+              fontWeight="bold"
+              textAlign="center"
+            >
               <PlayingField
                 height="150"
                 width="135"
@@ -313,7 +317,7 @@ const TeamAnalysis: React.FC<{
                     <RobotPath
                       key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
                       label={robotEntry.matchNumber.toString()}
-                      color='yellow'
+                      color="yellow"
                       path={robotEntry.autonomousPath}
                     />
                   );
@@ -333,38 +337,49 @@ const TeamAnalysis: React.FC<{
                 {robotEntries.length}
               </Text>
             </Stack>
-          ))
-        }
+          ))}
       </Stack>
       <Heading fontSize="3xl">teleop</Heading>
       <Stack isInline fontWeight="bold" alignItems="center" spacing={6}>
         <Stack isInline alignItems="center">
-          <Text>
-            Highest:
-          </Text>
-          <CubeDisplay
-            numCubes={Math.max(...robotEntries.map(telopCubes))}
-          />
+          <Text>Highest:</Text>
+          <CubeDisplay numCubes={Math.max(...robotEntries.map(telopCubes))} />
         </Stack>
         <Stack isInline alignItems="center">
-          <Text>
-            Median:
-          </Text>
-          <CubeDisplay
-            numCubes={median(robotEntries.map(telopCubes))}
-          />
+          <Text>Median:</Text>
+          <CubeDisplay numCubes={median(robotEntries.map(telopCubes))} />
         </Stack>
       </Stack>
       <Stack isInline justifyContent="center" spacing={6} flexWrap="wrap">
         {Object.keys(behaviors.teleopBehaviors)
-          .sort((a, b) => behaviors.teleopBehaviors[b].length - behaviors.teleopBehaviors[a].length)
+          .sort(
+            (a, b) =>
+              behaviors.teleopBehaviors[b].length -
+              behaviors.teleopBehaviors[a].length
+          )
           .map((teleopBehavior, idx) => (
-            <Stack key={idx} alignItems="center" fontWeight="bold" textAlign="center" border="1px solid" borderColor="whiteAlpha.600" rounded="md" paddingX={4} paddingY={2} marginBottom={6}>
+            <Stack
+              key={idx}
+              alignItems="center"
+              fontWeight="bold"
+              textAlign="center"
+              border="1px solid"
+              borderColor="whiteAlpha.600"
+              rounded="md"
+              paddingX={4}
+              paddingY={2}
+              marginBottom={6}
+            >
               <Text>{teleopBehavior}</Text>
               <Stack isInline>
                 <Text>AVG: </Text>
                 <CubeDisplay
-                  numCubes={behaviors.teleopBehaviors[teleopBehavior].map(telopCubes).reduce((acc, cur) => acc + cur, 0) / behaviors.teleopBehaviors[teleopBehavior].length}
+                  numCubes={
+                    behaviors.teleopBehaviors[teleopBehavior]
+                      .map(telopCubes)
+                      .reduce((acc, cur) => acc + cur, 0) /
+                    behaviors.teleopBehaviors[teleopBehavior].length
+                  }
                 />
               </Stack>
               <Text>
@@ -372,8 +387,7 @@ const TeamAnalysis: React.FC<{
                 {robotEntries.length}
               </Text>
             </Stack>
-          ))
-        }
+          ))}
       </Stack>
     </Stack>
   );
@@ -482,19 +496,12 @@ const HomePage: React.FC = () => {
               }}
             >
               {Object.keys(eventStore.events).length == 0 && (
-                <Box
-                  as="option"
-                  value=""
-                >
+                <Box as="option" value="">
                   No Events Found
                 </Box>
               )}
               {Object.keys(eventStore.events).map((eventSlug) => (
-                <Box
-                  key={eventSlug}
-                  as="option"
-                  value={eventSlug}
-                >
+                <Box key={eventSlug} as="option" value={eventSlug}>
                   {eventSlug}
                 </Box>
               ))}

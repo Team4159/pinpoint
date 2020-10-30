@@ -25,25 +25,30 @@ const autoClasses: BehaviorClass[] = [
   {
     test: (robotEntry) => robotEntry.autoCrossLine,
     name: 'Only Cross Auto Line',
-  }
+  },
 ];
 
 const teleopClasses: BehaviorClass[] = [
   {
     test: (robotEntry) => robotEntry.playedDefense,
-    name: (robotEntry) => `Defense ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+    name: (robotEntry) =>
+      `Defense ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
   },
   {
-    test: (robotEntry) => robotEntry.scaleCubesTeleop >= (robotEntry.ownSwitchCubesTeleop) && robotEntry.scaleCubesTeleop > 0,
+    test: (robotEntry) =>
+      robotEntry.scaleCubesTeleop >= robotEntry.ownSwitchCubesTeleop &&
+      robotEntry.scaleCubesTeleop > 0,
     name: 'Scale',
   },
   {
     test: (robotEntry) => robotEntry.ownSwitchCubesTeleop > 0,
-    name: (robotEntry) => `Own Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+    name: (robotEntry) =>
+      `Own Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
   },
   {
     test: (robotEntry) => robotEntry.oppSwitchCubesTeleop > 0,
-    name: (robotEntry) => `Opp. Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+    name: (robotEntry) =>
+      `Opp. Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
   },
   {
     test: (robotEntry) => robotEntry.exchangeCubes > 0,
@@ -51,7 +56,10 @@ const teleopClasses: BehaviorClass[] = [
   },
 ];
 
-const identifyBehavior = (behaviorClasses: BehaviorClass[], robotEntry: FRCRobotEntry) => {
+const identifyBehavior = (
+  behaviorClasses: BehaviorClass[],
+  robotEntry: FRCRobotEntry
+) => {
   for (let behaviorClass of behaviorClasses) {
     if (behaviorClass.test(robotEntry)) {
       return typeof behaviorClass.name == 'function'
@@ -60,7 +68,7 @@ const identifyBehavior = (behaviorClasses: BehaviorClass[], robotEntry: FRCRobot
     }
   }
   return 'Unknown';
-}
+};
 
 const classifyBehaviors = (robotEntries: FRCRobotEntry[]) => {
   const autoBehaviors: { [key: string]: FRCRobotEntry[] } = {};
