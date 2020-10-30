@@ -2,8 +2,20 @@ import { SVGProps } from 'react';
 import { useTheme } from '@chakra-ui/core';
 
 import { getPlatformColor } from '@/utils';
- 
-const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR'|'RRL'|'RLL'|'LLL'|'LRR'|'LLR'|'split' }> = ({ colorScheme, children, ...props }) => {
+
+const PlayingField: React.FC<
+  SVGProps<SVGSVGElement> & {
+    colorScheme:
+      | 'LLL'
+      | 'RRR'
+      | 'RRL'
+      | 'RLL'
+      | 'LLL'
+      | 'LRR'
+      | 'LLR'
+      | 'split';
+  }
+> = ({ colorScheme, children, ...props }) => {
   const theme = useTheme();
 
   return (
@@ -44,7 +56,11 @@ const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR
       {/* Switch Boxes */}
       <rect
         stroke={
-          theme.colors[colorScheme == 'split' ? 'blue' : getPlatformColor(colorScheme, 0, true)][600]
+          theme.colors[
+            colorScheme == 'split'
+              ? 'blue'
+              : getPlatformColor(colorScheme, 0, true)
+          ][600]
         }
         strokeWidth="1.5"
         x="144"
@@ -54,7 +70,11 @@ const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR
       />
       <rect
         stroke={
-          theme.colors[colorScheme == 'split' ? 'blue' : getPlatformColor(colorScheme, 0, false)][600]
+          theme.colors[
+            colorScheme == 'split'
+              ? 'blue'
+              : getPlatformColor(colorScheme, 0, false)
+          ][600]
         }
         strokeWidth="1.5"
         x="144"
@@ -64,7 +84,11 @@ const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR
       />
       <rect
         stroke={
-          theme.colors[colorScheme == 'split' ? 'red' : getPlatformColor(colorScheme, 2, true)][600]
+          theme.colors[
+            colorScheme == 'split'
+              ? 'red'
+              : getPlatformColor(colorScheme, 2, true)
+          ][600]
         }
         strokeWidth="1.5"
         x="456"
@@ -74,7 +98,11 @@ const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR
       />
       <rect
         stroke={
-          theme.colors[colorScheme == 'split' ? 'red' : getPlatformColor(colorScheme, 2, false)][600]
+          theme.colors[
+            colorScheme == 'split'
+              ? 'red'
+              : getPlatformColor(colorScheme, 2, false)
+          ][600]
         }
         strokeWidth="1.5"
         x="456"
@@ -85,7 +113,11 @@ const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR
       {/* Scale Boxes */}
       <rect
         stroke={
-          theme.colors[colorScheme == 'split' ? 'blue' : getPlatformColor(colorScheme, 1, true)][600]
+          theme.colors[
+            colorScheme == 'split'
+              ? 'blue'
+              : getPlatformColor(colorScheme, 1, true)
+          ][600]
         }
         strokeWidth="1.5"
         x="300"
@@ -95,7 +127,11 @@ const PlayingField: React.FC<SVGProps<SVGSVGElement> & { colorScheme: 'LLL'|'RRR
       />
       <rect
         stroke={
-          theme.colors[colorScheme == 'split' ? 'blue' : getPlatformColor(colorScheme, 1, true)][600]
+          theme.colors[
+            colorScheme == 'split'
+              ? 'blue'
+              : getPlatformColor(colorScheme, 1, true)
+          ][600]
         }
         strokeWidth="1.5"
         x="300"

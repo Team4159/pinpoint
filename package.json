@@ -9,8 +9,8 @@
     "export": "next export",
     "predeploy": "yarn build && yarn export && cp -r gh-pages/. out",
     "deploy": "node deploy.js",
-    "format": "prettier --single-quote --write './**/*'",
-    "format:check": "prettier --single-quote --check './**/*'"
+    "format": "prettier --single-quote --write './src/**/*'",
+    "format:check": "prettier --single-quote --check './src/**/*'"
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.12.1",

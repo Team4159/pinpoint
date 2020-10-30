@@ -24,7 +24,9 @@ class EventStore {
           tba: {},
         };
       })
-      .then(() => fetch(`${process.env.PREFIX_PATH}/event_data/${eventSlug}_tba.json`))
+      .then(() =>
+        fetch(`${process.env.PREFIX_PATH}/event_data/${eventSlug}_tba.json`)
+      )
       .then((res) => res.json())
       .then((tbaData: TBAMatch[]) => {
         this.events[eventSlug].tba = Object.fromEntries(
