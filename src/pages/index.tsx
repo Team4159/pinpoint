@@ -28,6 +28,7 @@ import {
   FIELD_DIMS,
   transformCoordinates,
   pathToD,
+  median,
 } from '@/utils';
 import classifyBehaviors from '@/modules/classify-behaviors';
 
@@ -104,8 +105,9 @@ const CubeDisplay: React.FC<{ numCubes: number }> = ({ numCubes }) => {
   }
 
   return (
-    <Stack isInline spacing={1} justifyContent="center">
+    <Stack isInline spacing={1} justifyContent="center" alignItems="center">
       {cubeIcons}
+      {numCubes > 3 && <Text>({numCubes % 1 == 0 ? numCubes : numCubes.toFixed(1)})</Text>}
     </Stack>
   );
 };
@@ -269,12 +271,30 @@ const TeamAnalysis: React.FC<{
       alignItems="center"
       spacing={6}
     >
-      <Heading fontSize="3xl">auto behaviors</Heading>
+      <Heading fontSize="3xl">autonomous</Heading>
+      <Stack isInline fontWeight="bold" spacing={6}>
+        <Stack isInline alignItems="center">
+          <Text>
+            Most Cubes Scored:
+          </Text>
+          <CubeDisplay
+            numCubes={Math.max(...robotEntries.map(robotEntry => robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes))}
+          />
+        </Stack>
+        <Stack isInline alignItems="center">
+          <Text>
+            Median Cubes Scored:
+          </Text>
+          <CubeDisplay
+            numCubes={median(robotEntries.map(robotEntry => robotEntry.autoSwitchCubes + robotEntry.autoScaleCubes))}
+          />
+        </Stack>
+      </Stack>
       <Stack isInline spacing={12}>
         {Object.keys(behaviors.autoBehaviors)
           .sort((a, b) => behaviors.autoBehaviors[b].length - behaviors.autoBehaviors[a].length)
           .map((autoBehavior, idx) => (
-            <Stack key={idx} alignItems="center" fontWeight="bold">
+            <Stack key={idx} alignItems="center" fontWeight="bold" textAlign="center">
               <PlayingField
                 height="150"
                 width="135"
@@ -312,6 +332,25 @@ const TeamAnalysis: React.FC<{
             </Stack>
           ))
         }
+      </Stack>
+      <Heading fontSize="3xl">teleop</Heading>
+      <Stack isInline fontWeight="bold" alignItems="center" spacing={6}>
+        <Stack isInline alignItems="center">
+          <Text>
+            Most Cubes Scored:
+          </Text>
+          <CubeDisplay
+            numCubes={Math.max(...robotEntries.map(robotEntry => robotEntry.scaleCubesTeleop + robotEntry.oppSwitchCubesTeleop + robotEntry.ownSwitchCubesTeleop))}
+          />
+        </Stack>
+        <Stack isInline alignItems="center">
+          <Text>
+            Median Cubes Scored:
+          </Text>
+          <CubeDisplay
+            numCubes={median(robotEntries.map(robotEntry => robotEntry.scaleCubesTeleop + robotEntry.oppSwitchCubesTeleop + robotEntry.ownSwitchCubesTeleop))}
+          />
+        </Stack>
       </Stack>
     </Stack>
   );
