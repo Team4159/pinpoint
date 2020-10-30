@@ -19,6 +19,7 @@
       "@/styles/*": ["styles/*"],
       "@/stores/*": ["stores/*"],
       "@/components/*": ["components/*"],
+      "@/modules/*": ["modules/*"],
       "@/theme": ["theme/index"],
       "@/styles": ["styles/index"],
       "@/types": ["types/index"],

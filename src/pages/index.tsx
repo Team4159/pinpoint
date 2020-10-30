@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   Box,
@@ -21,6 +21,8 @@ import { useObserver } from 'mobx-react';
 import { EventContext } from '@/stores/EventStore';
 
 import _ from 'lodash';
+import { getPlatformColor, getAllianceColor, FIELD_DIMS, transformCoordinates, pathToD } from '@/utils';
+import classifyBehaviors from '@/modules/classify-behaviors';
 
 import * as styles from '@/styles';
 
@@ -30,39 +32,6 @@ enum ViewType {
   Match = 'match',
   Team = 'team',
 };
-
-const getPlatformColor = (
-  match: TBAMatch,
-  platformIndex: number,
-  left: boolean
-) =>
-  match.score_breakdown.blue.tba_gameData[
-      platformIndex
-  ]
-     === (left ? 'L' : 'R')
-      ? 'blue'
-      : 'red';
-  
-const getAllianceColor = (match: TBAMatch, teamNumber: number) =>
-  match.alliances.red.team_keys.includes(
-    `frc${teamNumber}`
-  )
-    ? 'red'
-    : 'blue';
-
-const FIELD_DIMS = { w: 648, h: 360 };
-
-const transformCoordinates = ([y, x]: [number, number]): [number, number] => [
-  (y * 360) / 300,
-  x + FIELD_DIMS.w / 2,
-];
-
-const pathToD = (coords: [number, number][]) =>
-  `M${coords[0][1]},${coords[0][0]}` +
-  coords
-    .slice(1)
-    .map((coord) => `L${coord[1]},${coord[0]}`)
-    .join('');
 
 const RobotPath: React.FC<{
   robotEntry: FRCRobotEntry;
@@ -112,7 +81,7 @@ const PowerCube: React.FC = () => (
 
 const CubeDisplay: React.FC<{ numCubes: number  }> = ({ numCubes }) => (
   <Stack isInline spacing={1} justifyContent='center'>
-    {Array(numCubes).fill(null).map(() => <PowerCube/>)}
+    {Array(numCubes).fill(null).map((_, idx) => <PowerCube key={idx}/>)}
   </Stack>
 );
 const BoolDisplay: React.FC<{ b: boolean }> = ({ b }) => (
@@ -127,8 +96,6 @@ const MatchScoringBreakdown: React.FC<{
   viewType: IObservableValue<ViewType>;
   selectedView: IObservableValue<number>;
 }> = ({ robotEntries, tbaMatch, viewType, selectedView }) => {
-  const theme = useTheme();
-
   return (
     <Stack
       initial={{ opacity: 0, y: -10 }}
@@ -200,8 +167,9 @@ const MatchScoringBreakdown: React.FC<{
           </tr>
         </thead>
         <tbody>
-          {robotEntries.map(robotEntry => (
+          {robotEntries.map((robotEntry, idx) => (
             <Box
+              key={idx}
               as='tr'
               cursor='pointer'
               onClick={() => {
@@ -228,8 +196,8 @@ const MatchScoringBreakdown: React.FC<{
                     robotEntry.singleClimb ? 1 :
                       (robotEntry.climbWithOneBuddy ? 2 :
                         robotEntry.climbWithTwoBuddies ? 3 : 0)
-                  ).fill(null).map(() => (
-                    <UpDownIcon color='white'/>
+                  ).fill(null).map((_, idx) => (
+                    <UpDownIcon key={idx} color='white'/>
                   ))}
                 </Stack>
               </Box>
@@ -243,9 +211,64 @@ const MatchScoringBreakdown: React.FC<{
   );
 };
 
-const TeamAnalysis: React.FC = () => {
+const TeamAnalysis: React.FC<{
+  robotEntries: FRCRobotEntry[];
+  viewType: IObservableValue<ViewType>;
+  selectedView: IObservableValue<number>;
+}> = ({  robotEntries, viewType, selectedView }) => {
+  const behaviors = useMemo(() => classifyBehaviors(robotEntries), [robotEntries]);
+
   return (
-    null
+    <Stack
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      alignItems='center'
+    >
+      <Heading fontSize='3xl'>
+        analysis
+      </Heading>
+      <Stack isInline spacing={12}>
+        {
+          Object.keys(behaviors.autoBehaviors).map(autoBehavior => (
+            <Stack alignItems='center' fontWeight='bold'>
+              <svg width="150" viewBox="0 0 150 150">
+                <rect width="150" height="150" stroke="white" strokeWidth="1.5"/>
+                {behaviors.autoBehaviors[autoBehavior].map((robotEntry, idx) => {
+                  if (robotEntry.autonomousPath.length == 0) {
+                    return null;
+                  }
+
+                  const minY = Math.min(...robotEntry.autonomousPath.map(coord => coord[0]));
+                  const minX = Math.min(...robotEntry.autonomousPath.map(coord => coord[1]));
+                  const maxY = Math.max(...robotEntry.autonomousPath.map(coord => coord[0]));
+                  const maxX = Math.max(...robotEntry.autonomousPath.map(coord => coord[1]));
+
+                  const scalingFactor = Math.min(150 / (maxX - minX), 150 / (maxY - minY));
+                  console.log(robotEntry.autonomousPath);
+                  return (
+                    <motion.path
+                      key={`${robotEntry.matchNumber}${robotEntry.teamNumber}`}
+                      stroke="yellow"
+                      strokeWidth="1.5"
+                      fill="none"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1, transition: { duration: 5 } }}
+                      d={pathToD(robotEntry.autonomousPath.map(([y, x]) => [(y - minY + 50) * scalingFactor, (x - minX) * scalingFactor]))}
+                    />
+                  );
+                })}
+              </svg>
+              <Text>
+                {autoBehavior}
+              </Text>
+              <Text>
+                {behaviors.autoBehaviors[autoBehavior].length} / {robotEntries.length}
+              </Text>
+            </Stack>
+          ))
+        }
+      </Stack>
+    </Stack>
   );
 };
 
@@ -328,7 +351,7 @@ const HomePage: React.FC = () => {
       <Stack isInline spacing={16} paddingY={6}>
         <Stack>
           <Box>
-            <Text fontWeight="bold" paddingBottom={1}>
+            <Text fontWeight='bold' paddingBottom={1}>
               event
             </Text>
             <Select
@@ -346,7 +369,7 @@ const HomePage: React.FC = () => {
               }}
             >
               {Object.keys(eventStore.events).length == 0 && (
-                <Box as='option' backgroundColor={theme.colors.gray[600]} value="">
+                <Box as='option' backgroundColor={theme.colors.gray[600]} value=''>
                   No Events Found
                 </Box>
               )}
@@ -363,7 +386,7 @@ const HomePage: React.FC = () => {
             </Select>
           </Box>
           <Box>
-            <Text fontWeight="bold" paddingBottom={1}>
+            <Text fontWeight='bold' paddingBottom={1}>
               view type
             </Text>
             <Select
@@ -445,6 +468,14 @@ const HomePage: React.FC = () => {
                       getTBAMatch(robotEntry.matchNumber),
                       robotEntry.teamNumber
                     )}
+                    cursor='pointer'
+                    onClick={() => {
+                      viewType.set(viewType.get() == ViewType.Match ? ViewType.Team : ViewType.Match);
+                      selectedView.set(robotEntry[
+                        (viewType.get() == ViewType.Match ? 'team' : 'match') +
+                          'Number'
+                      ]);
+                    }}
                   >
                     {
                       robotEntry[
@@ -705,7 +736,11 @@ const HomePage: React.FC = () => {
                 selectedView={selectedView}
               />
             ) : (
-              null
+              <TeamAnalysis
+                robotEntries={selectedEntries.get()}
+                viewType={viewType}
+                selectedView={selectedView}
+              />
             )}
           </Stack>
         )}
