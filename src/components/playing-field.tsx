@@ -130,7 +130,7 @@ const PlayingField: React.FC<
           theme.colors[
             colorScheme == 'split'
               ? 'blue'
-              : getPlatformColor(colorScheme, 1, true)
+              : getPlatformColor(colorScheme, 1, false)
           ][600]
         }
         strokeWidth="1.5"
