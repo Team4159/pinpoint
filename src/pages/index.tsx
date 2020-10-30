@@ -393,14 +393,14 @@ const HomePage: React.FC = () => {
               {...styles.select}
               value={viewType.get()}
               onChange={(e) => {
-                viewType.set(e.target.value as ViewType);
                 selectedView.set(
                   Math.min(
                     ...(viewType.get() == ViewType.Match
-                      ? matchNumbers.get()
-                      : teamNumbers.get())
+                      ? teamNumbers.get()
+                      : matchNumbers.get())
                   )
                 );
+                viewType.set(e.target.value as ViewType);
               }}
             >
               <Box as='option' value={ViewType.Match}>match</Box>
@@ -470,11 +470,11 @@ const HomePage: React.FC = () => {
                     )}
                     cursor='pointer'
                     onClick={() => {
-                      viewType.set(viewType.get() == ViewType.Match ? ViewType.Team : ViewType.Match);
                       selectedView.set(robotEntry[
                         (viewType.get() == ViewType.Match ? 'team' : 'match') +
                           'Number'
                       ]);
+                      viewType.set(viewType.get() == ViewType.Match ? ViewType.Team : ViewType.Match);
                     }}
                   >
                     {
