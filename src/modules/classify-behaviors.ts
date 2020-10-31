@@ -30,11 +30,6 @@ const autoClasses: BehaviorClass[] = [
 
 const teleopClasses: BehaviorClass[] = [
   {
-    test: (robotEntry) => robotEntry.playedDefense,
-    name: (robotEntry) =>
-      `Defense ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
-  },
-  {
     test: (robotEntry) =>
       robotEntry.scaleCubesTeleop >= robotEntry.ownSwitchCubesTeleop &&
       robotEntry.scaleCubesTeleop > 0,
@@ -43,12 +38,12 @@ const teleopClasses: BehaviorClass[] = [
   {
     test: (robotEntry) => robotEntry.ownSwitchCubesTeleop > 0,
     name: (robotEntry) =>
-      `Own Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+      `Own Switch ${robotEntry.exchangeCubes > 0 ? '& Exchange' : ''}${robotEntry.playedDefense ? ' & Defense' : ''}`,
   },
   {
     test: (robotEntry) => robotEntry.oppSwitchCubesTeleop > 0,
     name: (robotEntry) =>
-      `Opp. Switch ${robotEntry.exchangeCubes > 0 ? 'and Exchange' : ''}`,
+      `Opp. Switch${robotEntry.exchangeCubes > 0 ? ' & Exchange' : ''}${robotEntry.playedDefense ? ' & Defense' : ''}`,
   },
   {
     test: (robotEntry) => robotEntry.exchangeCubes > 0,

@@ -22,7 +22,7 @@ import { computed, observable, IObservableValue } from 'mobx';
 import { useObserver } from 'mobx-react';
 import { EventContext } from '@/stores/EventStore';
 
-import _, { some } from 'lodash';
+import _ from 'lodash';
 import {
   getAllianceColor,
   FIELD_DIMS,
@@ -270,6 +270,14 @@ const TeamAnalysis: React.FC<{
     robotEntry.ownSwitchCubesTeleop +
     robotEntry.exchangeCubes;
 
+  const autoCubeList = robotEntries.map(autoCubes);
+  const maxAutoCubes = Math.max(...autoCubeList);
+  const medianAutoCubes = median(autoCubeList);
+
+  const teleopCubeList = robotEntries.map(telopCubes);
+  const maxTeleopCubes = Math.max(...teleopCubeList);
+  const medianTeleopCubes = median(teleopCubeList);
+
   return (
     <Stack
       initial={{ opacity: 0, y: -10 }}
@@ -282,11 +290,15 @@ const TeamAnalysis: React.FC<{
       <Stack isInline spacing={6}>
         <Stack isInline alignItems="center">
           <Text>Highest:</Text>
-          <CubeDisplay numCubes={Math.max(...robotEntries.map(autoCubes))} />
+          {maxAutoCubes > 0 ? (
+            <CubeDisplay numCubes={maxAutoCubes} />
+          ) : <Text>(0)</Text>}
         </Stack>
         <Stack isInline alignItems="center">
           <Text>Median:</Text>
-          <CubeDisplay numCubes={median(robotEntries.map(autoCubes))} />
+          {medianAutoCubes > 0 ? (
+            <CubeDisplay numCubes={medianAutoCubes} />
+          ) : <Text>(0)</Text>}
         </Stack>
       </Stack>
       <Stack isInline spacing={12} flexWrap="wrap" justifyContent="center">
@@ -342,13 +354,17 @@ const TeamAnalysis: React.FC<{
       </Stack>
       <Heading fontSize="3xl">teleop</Heading>
       <Stack isInline alignItems="center" spacing={6}>
-        <Stack isInline alignItems="center">
+      <Stack isInline alignItems="center">
           <Text>Highest:</Text>
-          <CubeDisplay numCubes={Math.max(...robotEntries.map(telopCubes))} />
+          {maxTeleopCubes > 0 ? (
+            <CubeDisplay numCubes={maxTeleopCubes} />
+          ) : <Text>(0)</Text>}
         </Stack>
         <Stack isInline alignItems="center">
           <Text>Median:</Text>
-          <CubeDisplay numCubes={median(robotEntries.map(telopCubes))} />
+          {medianTeleopCubes > 0 ? (
+            <CubeDisplay numCubes={medianTeleopCubes} />
+          ) : <Text>(0)</Text>}
         </Stack>
       </Stack>
       <Stack isInline justifyContent="center" spacing={6} flexWrap="wrap">
@@ -358,37 +374,40 @@ const TeamAnalysis: React.FC<{
               behaviors.teleopBehaviors[b].length -
               behaviors.teleopBehaviors[a].length
           )
-          .map((teleopBehavior, idx) => (
-            <Stack
-              key={idx}
-              alignItems="center"
-              fontWeight="bold"
-              textAlign="center"
-              border="1px solid"
-              borderColor="whiteAlpha.600"
-              rounded="md"
-              paddingX={4}
-              paddingY={2}
-              marginBottom={6}
-            >
-              <Text>{teleopBehavior}</Text>
-              <Stack isInline>
-                <Text>AVG: </Text>
-                <CubeDisplay
-                  numCubes={
-                    behaviors.teleopBehaviors[teleopBehavior]
-                      .map(telopCubes)
-                      .reduce((acc, cur) => acc + cur, 0) /
-                    behaviors.teleopBehaviors[teleopBehavior].length
-                  }
-                />
+          .map((teleopBehavior, idx) => {
+            const averageCubes = behaviors.teleopBehaviors[teleopBehavior]
+                .map(telopCubes)
+                .reduce((acc, cur) => acc + cur, 0) /
+              behaviors.teleopBehaviors[teleopBehavior].length;
+            return (
+              <Stack
+                key={idx}
+                alignItems="center"
+                fontWeight="bold"
+                textAlign="center"
+                border="1px solid"
+                borderColor="whiteAlpha.600"
+                rounded="md"
+                paddingX={4}
+                paddingY={2}
+                marginBottom={6}
+              >
+                <Text>{teleopBehavior}</Text>
+                <Stack isInline>
+                  <Text>AVG: </Text>
+                  {averageCubes > 0 ? (
+                    <CubeDisplay
+                      numCubes={averageCubes}
+                    />
+                  ) : <Text>(0)</Text>}
+                </Stack>
+                <Text>
+                  {behaviors.teleopBehaviors[teleopBehavior].length} /{' '}
+                  {robotEntries.length}
+                </Text>
               </Stack>
-              <Text>
-                {behaviors.teleopBehaviors[teleopBehavior].length} /{' '}
-                {robotEntries.length}
-              </Text>
-            </Stack>
-          ))}
+            );
+          })}
       </Stack>
       <Heading fontSize="3xl">misc</Heading>
       <Stack isInline spacing={12}>
@@ -571,6 +590,7 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             alignItems="center"
             spacing={6}
+            flexGrow={1}
           >
             <Stack alignItems="center">
               <Stack isInline alignItems="center" spacing={4}>
