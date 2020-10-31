@@ -9,6 +9,7 @@ import {
   Link,
   Select,
   Text,
+  Textarea,
   useTheme,
 } from '@chakra-ui/core';
 import { motion } from 'framer-motion';
@@ -18,7 +19,7 @@ import PlayingField from '@/components/playing-field';
 import Container from '@/components/container';
 import Header from '@/components/header';
 
-import { computed, observable, IObservableValue } from 'mobx';
+import { computed, observable, IObservableValue, autorun } from 'mobx';
 import { useObserver } from 'mobx-react';
 import { EventContext } from '@/stores/EventStore';
 
@@ -255,9 +256,10 @@ const MatchScoringBreakdown: React.FC<{
 
 const TeamAnalysis: React.FC<{
   robotEntries: FRCRobotEntry[];
+  selectedEventSlug: IObservableValue<string>;
   viewType: IObservableValue<ViewType>;
   selectedView: IObservableValue<number>;
-}> = ({ robotEntries, viewType, selectedView }) => {
+}> = ({ robotEntries, selectedEventSlug, viewType, selectedView }) => {
   const behaviors = useMemo(() => classifyBehaviors(robotEntries), [
     robotEntries,
   ]);
@@ -278,7 +280,15 @@ const TeamAnalysis: React.FC<{
   const maxTeleopCubes = Math.max(...teleopCubeList);
   const medianTeleopCubes = median(teleopCubeList);
 
-  return (
+  const [notes] = useState(observable.box(''));
+  autorun(() => {
+    notes.set(localStorage.getItem(`${selectedEventSlug.get()}.${viewType.get()}.${selectedView.get()}`) || '');
+  });
+  autorun(() => {
+    localStorage.setItem(`${selectedEventSlug.get()}.${viewType.get()}.${selectedView.get()}`, notes.get());
+  });
+
+  return useObserver(() => (
     <Stack
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -409,22 +419,25 @@ const TeamAnalysis: React.FC<{
             );
           })}
       </Stack>
-      <Heading fontSize="3xl">misc</Heading>
       <Stack isInline spacing={12}>
-        <Image
-          src={`${process.env.PREFIX_PATH}/robot_images/${selectedView.get()}.jpg`}
-          flexBasis="50%"
-          rounded="md"
-        />
-        <Stack fontSize="xl" flexBasis="50%">
-          <Stack isInline alignItems="center" spacing={3}>
-            <Text>Can Do Scale? </Text>
-            <BoolDisplay b={robotEntries.some(robotEntry => robotEntry.autoScaleCubes > 0 || robotEntry.scaleCubesTeleop > 0)} />
-          </Stack>
+        <Stack flexBasis="50%" maxWidth="600px">
+          <Heading fontSize="3xl">robot image</Heading>
+          <Image
+            src={`${process.env.PREFIX_PATH}/robot_images/${selectedView.get()}.jpg`}
+            rounded="md"
+          />
+        </Stack>
+        <Stack flexBasis="50%" maxWidth="600px">
+          <Heading fontSize="3xl">notes</Heading>
+          <Textarea
+            flexGrow={1}
+            value={notes.get()}
+            onChange={e => notes.set(e.target.value)}
+          />
         </Stack>
       </Stack>
     </Stack>
-  );
+  ));
 };
 
 const HomePage: React.FC = () => {
@@ -705,6 +718,7 @@ const HomePage: React.FC = () => {
               <TeamAnalysis
                 key={selectedView.get()}
                 robotEntries={selectedEntries.get()}
+                selectedEventSlug={selectedEventSlug}
                 viewType={viewType}
                 selectedView={selectedView}
               />
