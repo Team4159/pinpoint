@@ -22,7 +22,7 @@ import { computed, observable, IObservableValue } from 'mobx';
 import { useObserver } from 'mobx-react';
 import { EventContext } from '@/stores/EventStore';
 
-import _ from 'lodash';
+import _, { some } from 'lodash';
 import {
   getAllianceColor,
   FIELD_DIMS,
@@ -276,9 +276,10 @@ const TeamAnalysis: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       alignItems="center"
       spacing={6}
+      fontWeight="bold"
     >
       <Heading fontSize="3xl">autonomous</Heading>
-      <Stack isInline fontWeight="bold" spacing={6}>
+      <Stack isInline spacing={6}>
         <Stack isInline alignItems="center">
           <Text>Highest:</Text>
           <CubeDisplay numCubes={Math.max(...robotEntries.map(autoCubes))} />
@@ -288,7 +289,7 @@ const TeamAnalysis: React.FC<{
           <CubeDisplay numCubes={median(robotEntries.map(autoCubes))} />
         </Stack>
       </Stack>
-      <Stack isInline spacing={12}>
+      <Stack isInline spacing={12} flexWrap="wrap" justifyContent="center">
         {Object.keys(behaviors.autoBehaviors)
           .sort(
             (a, b) =>
@@ -340,7 +341,7 @@ const TeamAnalysis: React.FC<{
           ))}
       </Stack>
       <Heading fontSize="3xl">teleop</Heading>
-      <Stack isInline fontWeight="bold" alignItems="center" spacing={6}>
+      <Stack isInline alignItems="center" spacing={6}>
         <Stack isInline alignItems="center">
           <Text>Highest:</Text>
           <CubeDisplay numCubes={Math.max(...robotEntries.map(telopCubes))} />
@@ -388,6 +389,20 @@ const TeamAnalysis: React.FC<{
               </Text>
             </Stack>
           ))}
+      </Stack>
+      <Heading fontSize="3xl">misc</Heading>
+      <Stack isInline spacing={12}>
+        <Image
+          src={`${process.env.PREFIX_PATH}/robot_images/${selectedView.get()}.jpg`}
+          flexBasis="50%"
+          rounded="md"
+        />
+        <Stack fontSize="xl" flexBasis="50%">
+          <Stack isInline alignItems="center" spacing={3}>
+            <Text>Can Do Scale? </Text>
+            <BoolDisplay b={robotEntries.some(robotEntry => robotEntry.autoScaleCubes > 0 || robotEntry.scaleCubesTeleop > 0)} />
+          </Stack>
+        </Stack>
       </Stack>
     </Stack>
   );
