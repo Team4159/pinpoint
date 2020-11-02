@@ -1,4 +1,4 @@
-import { SVGProps } from 'react';
+import { SVGProps, forwardRef } from 'react';
 import { useTheme } from '@chakra-ui/core';
 
 import { getPlatformColor } from '@/utils';
@@ -15,11 +15,12 @@ const PlayingField: React.FC<
       | 'LLR'
       | 'split';
   }
-> = ({ colorScheme, children, ...props }) => {
+> = forwardRef(({ colorScheme, children, ...props }, ref) => {
   const theme = useTheme();
 
   return (
     <svg
+      ref={ref}
       style={{ maxWidth: '648px' }}
       viewBox="0 0 648 360"
       xmlns="http://www.w3.org/2000/svg"
@@ -274,6 +275,6 @@ const PlayingField: React.FC<
       {children}
     </svg>
   );
-};
+});
 
 export default PlayingField;
