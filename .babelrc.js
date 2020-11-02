@@ -7,7 +7,7 @@ module.exports = {
       'transform-define',
       {
         'process.env.PREFIX_PATH':
-          process.env.NODE_ENV === 'production' ? '/bb-scouting' : '',
+          process.env.NODE_ENV === 'production' ? '/pinpoint' : '',
       },
     ],
   ],

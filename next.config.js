@@ -1,3 +1,3 @@
 module.exports = {
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/bb-scouting/' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/pinpoint/' : '',
 };
