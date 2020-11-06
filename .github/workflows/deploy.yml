@@ -1,5 +1,8 @@
 name: Build and Deploy
-on: [push]
+on:
+  push:
+    branches:
+      - master
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -23,3 +26,5 @@ jobs:
           BRANCH: gh-pages # The branch the action should deploy to.
           FOLDER: out # The folder the action should deploy.
           CLEAN: true # Automatically remove deleted files from the deploy branch
+          GIT_CONFIG_NAME: github-actions
+          GIT_CONFIG_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
