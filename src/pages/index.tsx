@@ -357,24 +357,28 @@ const TeamAnalysis: React.FC<{
               <Text>{autoBehavior}</Text>
               <Text>
                 {behaviors.autoBehaviors[autoBehavior].length} /{' '}
-                {robotEntries.length}
+                {robotEntries.length} matches
               </Text>
             </Stack>
           ))}
       </Stack>
       <Heading fontSize="3xl">teleop</Heading>
       <Stack isInline alignItems="center" spacing={6}>
-      <Stack isInline alignItems="center">
+        <Stack alignItems="center">
           <Text>Highest:</Text>
           {maxTeleopCubes > 0 ? (
             <CubeDisplay numCubes={maxTeleopCubes} />
           ) : <Text>(0)</Text>}
         </Stack>
-        <Stack isInline alignItems="center">
+        <Stack alignItems="center">
           <Text>Median:</Text>
           {medianTeleopCubes > 0 ? (
             <CubeDisplay numCubes={medianTeleopCubes} />
           ) : <Text>(0)</Text>}
+        </Stack>
+        <Stack alignItems="center">
+          <Text>Driver Skill:</Text>
+          <Text color="green.500">5</Text>
         </Stack>
       </Stack>
       <Stack isInline justifyContent="center" spacing={6} flexWrap="wrap">
@@ -413,7 +417,7 @@ const TeamAnalysis: React.FC<{
                 </Stack>
                 <Text>
                   {behaviors.teleopBehaviors[teleopBehavior].length} /{' '}
-                  {robotEntries.length}
+                  {robotEntries.length} matches
                 </Text>
               </Stack>
             );
