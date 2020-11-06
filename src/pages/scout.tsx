@@ -20,11 +20,15 @@ const ScoutingPage: React.FC = () => {
           ref={fieldRef}
           colorScheme="LLL"
           onMouseDown={() => setDrawing(true)}
-          onMouseMove={e => {
+          onMouseMove={(e) => {
             if (drawing) {
               // @ts-ignore
               const boundingRect = fieldRef.current?.getBoundingClientRect();
-              setRobotPath(current => current.concat([[e.clientY - boundingRect.y, e.clientX - boundingRect.x]]));
+              setRobotPath((current) =>
+                current.concat([
+                  [e.clientY - boundingRect.y, e.clientX - boundingRect.x],
+                ])
+              );
             }
           }}
           onMouseUp={() => setDrawing(false)}

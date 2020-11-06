@@ -282,10 +282,17 @@ const TeamAnalysis: React.FC<{
 
   const [notes] = useState(observable.box(''));
   autorun(() => {
-    notes.set(localStorage.getItem(`${selectedEventSlug.get()}.${viewType.get()}.${selectedView.get()}`) || '');
+    notes.set(
+      localStorage.getItem(
+        `${selectedEventSlug.get()}.${viewType.get()}.${selectedView.get()}`
+      ) || ''
+    );
   });
   autorun(() => {
-    localStorage.setItem(`${selectedEventSlug.get()}.${viewType.get()}.${selectedView.get()}`, notes.get());
+    localStorage.setItem(
+      `${selectedEventSlug.get()}.${viewType.get()}.${selectedView.get()}`,
+      notes.get()
+    );
   });
 
   return useObserver(() => (
@@ -302,13 +309,17 @@ const TeamAnalysis: React.FC<{
           <Text>Highest:</Text>
           {maxAutoCubes > 0 ? (
             <CubeDisplay numCubes={maxAutoCubes} />
-          ) : <Text>(0)</Text>}
+          ) : (
+            <Text>(0)</Text>
+          )}
         </Stack>
         <Stack isInline alignItems="center">
           <Text>Median:</Text>
           {medianAutoCubes > 0 ? (
             <CubeDisplay numCubes={medianAutoCubes} />
-          ) : <Text>(0)</Text>}
+          ) : (
+            <Text>(0)</Text>
+          )}
         </Stack>
       </Stack>
       <Stack isInline spacing={12} flexWrap="wrap" justifyContent="center">
@@ -368,13 +379,17 @@ const TeamAnalysis: React.FC<{
           <Text>Highest:</Text>
           {maxTeleopCubes > 0 ? (
             <CubeDisplay numCubes={maxTeleopCubes} />
-          ) : <Text>(0)</Text>}
+          ) : (
+            <Text>(0)</Text>
+          )}
         </Stack>
         <Stack alignItems="center">
           <Text>Median:</Text>
           {medianTeleopCubes > 0 ? (
             <CubeDisplay numCubes={medianTeleopCubes} />
-          ) : <Text>(0)</Text>}
+          ) : (
+            <Text>(0)</Text>
+          )}
         </Stack>
         <Stack alignItems="center">
           <Text>Driver Skill:</Text>
@@ -389,7 +404,8 @@ const TeamAnalysis: React.FC<{
               behaviors.teleopBehaviors[a].length
           )
           .map((teleopBehavior, idx) => {
-            const averageCubes = behaviors.teleopBehaviors[teleopBehavior]
+            const averageCubes =
+              behaviors.teleopBehaviors[teleopBehavior]
                 .map(telopCubes)
                 .reduce((acc, cur) => acc + cur, 0) /
               behaviors.teleopBehaviors[teleopBehavior].length;
@@ -410,10 +426,10 @@ const TeamAnalysis: React.FC<{
                 <Stack isInline>
                   <Text>AVG: </Text>
                   {averageCubes > 0 ? (
-                    <CubeDisplay
-                      numCubes={averageCubes}
-                    />
-                  ) : <Text>(0)</Text>}
+                    <CubeDisplay numCubes={averageCubes} />
+                  ) : (
+                    <Text>(0)</Text>
+                  )}
                 </Stack>
                 <Text>
                   {behaviors.teleopBehaviors[teleopBehavior].length} /{' '}
@@ -427,7 +443,9 @@ const TeamAnalysis: React.FC<{
         <Stack flexBasis="50%" maxWidth="600px">
           <Heading fontSize="3xl">robot image</Heading>
           <Image
-            src={`${process.env.PREFIX_PATH}/robot_images/${selectedView.get()}.jpg`}
+            src={`${
+              process.env.PREFIX_PATH
+            }/robot_images/${selectedView.get()}.jpg`}
             rounded="md"
           />
         </Stack>
@@ -436,7 +454,7 @@ const TeamAnalysis: React.FC<{
           <Textarea
             flexGrow={1}
             value={notes.get()}
-            onChange={e => notes.set(e.target.value)}
+            onChange={(e) => notes.set(e.target.value)}
           />
         </Stack>
       </Stack>
