@@ -29,7 +29,6 @@ import {
   FIELD_DIMS,
   transformCoordinates,
   pathToD,
-  median,
 } from '@/utils';
 import classifyBehaviors from '@/modules/classify-behaviors';
 
@@ -274,11 +273,11 @@ const TeamAnalysis: React.FC<{
 
   const autoCubeList = robotEntries.map(autoCubes);
   const maxAutoCubes = Math.max(...autoCubeList);
-  const medianAutoCubes = median(autoCubeList);
+  const averageAutoCubes = _.meanBy(autoCubeList);
 
   const teleopCubeList = robotEntries.map(telopCubes);
   const maxTeleopCubes = Math.max(...teleopCubeList);
-  const medianTeleopCubes = median(teleopCubeList);
+  const averageTeleopCubes = _.meanBy(teleopCubeList);
 
   const [notes] = useState(observable.box(''));
   autorun(() => {
@@ -314,9 +313,9 @@ const TeamAnalysis: React.FC<{
           )}
         </Stack>
         <Stack isInline alignItems="center">
-          <Text>Median:</Text>
-          {medianAutoCubes > 0 ? (
-            <CubeDisplay numCubes={medianAutoCubes} />
+          <Text>Average:</Text>
+          {averageTeleopCubes > 0 ? (
+            <CubeDisplay numCubes={averageTeleopCubes} />
           ) : (
             <Text>(0)</Text>
           )}
@@ -384,9 +383,9 @@ const TeamAnalysis: React.FC<{
           )}
         </Stack>
         <Stack alignItems="center">
-          <Text>Median:</Text>
-          {medianTeleopCubes > 0 ? (
-            <CubeDisplay numCubes={medianTeleopCubes} />
+          <Text>Average:</Text>
+          {averageTeleopCubes > 0 ? (
+            <CubeDisplay numCubes={averageTeleopCubes} />
           ) : (
             <Text>(0)</Text>
           )}
