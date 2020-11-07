@@ -241,7 +241,7 @@ const MatchScoringBreakdown: React.FC<{
                 </Stack>
               </Box>
               <Box as="td" {...styles.cell}>
-                <CubeDisplay numCubes={robotEntry.oppSwitchCubesTeleop} />
+                <CubeDisplay numCubes={robotEntry.exchangeCubes} />
               </Box>
               <Box as="td" {...styles.cell}>
                 <BoolDisplay b={robotEntry.playedDefense} />
