@@ -314,8 +314,8 @@ const TeamAnalysis: React.FC<{
         </Stack>
         <Stack isInline alignItems="center">
           <Text>Average:</Text>
-          {averageTeleopCubes > 0 ? (
-            <CubeDisplay numCubes={averageTeleopCubes} />
+          {averageAutoCubes > 0 ? (
+            <CubeDisplay numCubes={averageAutoCubes} />
           ) : (
             <Text>(0)</Text>
           )}
